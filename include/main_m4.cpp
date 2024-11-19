@@ -375,86 +375,76 @@ void RPCRead()
           digitalWrite(LED_BUILTIN, LOW);
           if (inputString_rpc.startsWith("/s_motor:")) //Speed Motor
            {
-              int* value = decode_values(inputString_rpc, 3);
+              int* value = decode_values(inputString_rpc, 4);
               #if DEBUG_M4
                 SerialRPC.print("Recibido Speed M4: ");
                 SerialRPC.println(inputString_rpc);
-                for(int i=0; i<3; i++) RPC.println(value[i]);
+                for(int i=0; i<4; i++) RPC.println(value[i]);
               #endif
               motorDirection = value[1];
               motorSpeedValue = value[2];
               motorIsSpeedActive = true;
               motorIsIntervalActive = false;
-              if (value[0]==4)
+              if (motorSpeedValue>0) motorSpeedValue = map(motorSpeedValue, 24, 48, 146, 192); //Fake fps
+              if (value[3]==false) //Si es falso, se ejecuta, sino se guarda sin ejecutar
                 {
-                  uint8_t value_temp = 0;
-                  if (motorSpeedValue>0) value_temp = map(motorSpeedValue, 24, 48, 146, 192); //Fake fps
-                  if (value_temp==0) secure_stop(motorDirection);
-                  else config_speed_motor(value[0], motorDirection, value_temp);
+                  if (motorSpeedValue==0) secure_stop(motorDirection);
+                  else config_speed_motor(value[0], motorDirection, motorSpeedValue);
                 }
-              else config_speed_motor(value[0], motorDirection, value[2]);
             }
           else if (inputString_rpc.startsWith("/i_motor:")) //Interval Motor
            {
-              int* value = decode_values(inputString_rpc, 4);
+              int* value = decode_values(inputString_rpc, 5);
               #if DEBUG_M4
                 SerialRPC.print("Recibido Interval M4: ");
                 SerialRPC.println(inputString_rpc);
-                for(int i=0; i<4; i++) RPC.println(value[i]);
+                for(int i=0; i<5; i++) RPC.println(value[i]);
               #endif
               motorDirection = value[1];
               motorIntervalFrames = value[2];
               motorIntervalSeconds = value[3];
               motorIsIntervalActive = true;
               motorIsSpeedActive = false;
-              config_interval_motor(value[0], motorDirection, motorIntervalFrames, motorIntervalSeconds);
+              if (value[4]==false) //Si es falso, se ejecuta, sino se guarda sin ejecutar
+                {
+                  config_interval_motor(value[0], motorDirection, motorIntervalFrames, motorIntervalSeconds);
+                }
+              
             }
           else if (inputString_rpc.startsWith("/fade:")) //Fade configuration
            {
-              int* value = decode_values(inputString_rpc, 5);
+              int* value = decode_values(inputString_rpc, 6);
               #if DEBUG_M4
                 SerialRPC.print("Recibido fade M4: ");
                 SerialRPC.println(inputString_rpc);
-                for(int i=0; i<5; i++) RPC.println(value[i]);
+                for(int i=0; i<6; i++) RPC.println(value[i]);
               #endif
-              config_automatic_fade(value[0], value[1], value[2], value[3], value[4]);
+              shutterFadePercent = value[0];
+              shutterFadeFrames = value[1];
+              shutterSyncWithInterval = value[2];
+              shutterFadeInActive = value[3];
+              shutterFadeOutActive = value[4];
+              if (value[5]==false) //Si es falso, se ejecuta, sino se guarda sin ejecutar
+                {
+                  config_automatic_fade(shutterFadePercent, shutterFadeFrames, shutterSyncWithInterval, shutterFadeInActive, shutterFadeOutActive);
+                }
             }
-          else if (inputString_rpc.startsWith("/optics:")) //Fade configuration
+          else if (inputString_rpc.startsWith("/optics:")) //Optics configuration
            {
-              int* value = decode_values(inputString_rpc, 4);
+              int* value = decode_values(inputString_rpc, 5);
               #if DEBUG_M4
                 SerialRPC.print("Recibido optics M4: ");
                 SerialRPC.println(inputString_rpc);
-                for(int i=0; i<4; i++) RPC.println(value[i]);
+                for(int i=0; i<5; i++) RPC.println(value[i]);
               #endif
-              config_optics(value[0], value[1], value[2], value[3]);
-            }
-          else if (inputString_rpc.startsWith("/p_motor:")) //Position motor
-            {
-              String str = inputString_rpc.substring(inputString_rpc.lastIndexOf(":") + 1);
-              int value[3];
-              value[0] = str.substring(0, str.indexOf(',')).toInt();
-              str = str.substring(str.indexOf(',')+1);
-              value[1] = str.substring(0, str.indexOf(',')).toInt();
-              #if DEBUG_M4
-                SerialRPC.print("Recibido Position M4: ");
-                SerialRPC.println(inputString_rpc);
-                for(int i=0; i<2; i++) RPC.println(value[i]);
-              #endif
-              config_position_motor(value[0], value[1]);
-            }
-          else if (inputString_rpc.startsWith("/led:")) //Position motor
-            {
-              String str = inputString_rpc.substring(inputString_rpc.lastIndexOf(":") + 1);
-              int value;
-              value = str.substring(0, str.indexOf(',')).toInt();
-              if (value) digitalWrite(LED_BUILTIN, HIGH);
-              else digitalWrite(LED_BUILTIN, LOW);
-              #if DEBUG_M4
-                SerialRPC.print("Recibido led M4: ");
-                SerialRPC.println(inputString_rpc);
-                RPC.println(value);
-              #endif
+              zoomValue = value[0];
+              focusValue = value[1];
+              diaphragmValue = value[2];
+              syncWithIntervalOptics = value[3];
+              if (value[4]==false) //Si es falso, se ejecuta, sino se guarda sin ejecutar
+                {
+                  config_optics(zoomValue, focusValue, diaphragmValue, syncWithIntervalOptics);
+                }
             }
            inputString_rpc = String();
            digitalWrite(LED_BUILTIN, HIGH);

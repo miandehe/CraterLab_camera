@@ -110,6 +110,7 @@ void handlePostRequest(String body) {
   // Parseamos el cuerpo del JSON
   StaticJsonDocument<1000> doc;
   deserializeJson(doc, body);
+  int save = true;
   //DeserializationError error = deserializeJson(doc, body);
   /*if (error) {
     Serial.println("Error al parsear el JSON");
@@ -119,9 +120,12 @@ void handlePostRequest(String body) {
 
   Serial.println("Procesando JSON...");
   String type = doc["type"];
-  if (type=="save_motor") 
+  if ((type=="save_motor")||(type=="test_motor"))
     {
-      Serial.println("MOTOR");
+      Serial.println(type);
+      if (type=="save_motor") save = true;
+      else save = false;
+
       /*motorSpeedValue = doc["speedValue"];
       motorIsSpeedActive = doc["isSpeedActive"];
       motorIntervalFrames = doc["intervalFrames"];
@@ -138,11 +142,11 @@ void handlePostRequest(String body) {
       else if (Direction=="backward") motorDirection = BACKWARD;
       if(motorIsSpeedActive)
         {
-          SerialRPC.println("/s_motor:4," + String(motorDirection) + "," + String(motorSpeedValue));
+          SerialRPC.println("/s_motor:4," + String(motorDirection) + "," + String(motorSpeedValue) + "," + String(save));
         }
       else if(motorIsIntervalActive)
         {
-          SerialRPC.println("/i_motor:4," + String(motorDirection) + "," + String(motorIntervalFrames) + "," + String(motorIntervalSeconds));
+          SerialRPC.println("/i_motor:4," + String(motorDirection) + "," + String(motorIntervalFrames) + "," + String(motorIntervalSeconds) + "," + String(save));
         }   
       /*Clave: type, Valor: motor
       Clave: speedValue, Valor: )25
@@ -152,42 +156,11 @@ void handlePostRequest(String body) {
       Clave: isIntervalActive, Valor: false
       Clave: direction, Valor: forward*/
     }
-  if (type=="test_motor") 
+  else if ((type=="test_shutter")||(type=="save_shutter") )
     {
-      Serial.println("MOTOR");
-      /*motorSpeedValue = doc["speedValue"];
-      motorIsSpeedActive = doc["isSpeedActive"];
-      motorIntervalFrames = doc["intervalFrames"];
-      motorIntervalSeconds = doc["intervalSeconds"];
-      motorIsIntervalActive = doc["isIntervalActive"];
-      String Direction = doc["direction"];*/
-      motorSpeedValue = doc["0"];
-      motorIsSpeedActive = doc["1"];
-      motorIntervalFrames = doc["2"];
-      motorIntervalSeconds = doc["3"];
-      motorIsIntervalActive = doc["4"];
-      String Direction = doc["5"];
-      if (Direction=="forward") motorDirection = FORWARD;
-      else if (Direction=="backward") motorDirection = BACKWARD;
-      if(motorIsSpeedActive)
-        {
-          SerialRPC.println("/s_motor:4," + String(motorDirection) + "," + String(motorSpeedValue));
-        }
-      else if(motorIsIntervalActive)
-        {
-          SerialRPC.println("/i_motor:4," + String(motorDirection) + "," + String(motorIntervalFrames) + "," + String(motorIntervalSeconds));
-        }   
-      /*Clave: type, Valor: motor
-      Clave: speedValue, Valor: )25
-      Clave: isSpeedActive, Valor: false
-      Clave: intervalFrames, Valor: 1
-      Clave: intervalSeconds, Valor: 1
-      Clave: isIntervalActive, Valor: false
-      Clave: direction, Valor: forward*/
-    }
-  else if (type=="test_shutter") 
-    {
-      Serial.println("Shutter");
+      Serial.println(type);
+      if (type=="save_shutter") save = true;
+      else save = false;
       /*shutterFadePercent = doc["fadePercent"];
       shutterFadeFrames = doc["fadeFrames"];
       shutterSyncWithInterval = doc["syncWithInterval"];
@@ -198,21 +171,23 @@ void handlePostRequest(String body) {
       shutterSyncWithInterval = doc["2"];
       shutterFadeInActive = doc["3"];
       shutterFadeOutActive = doc["4"];
-      SerialRPC.println("/fade:" + String(shutterFadePercent) + "," + String(shutterFadeFrames) + "," + String(shutterSyncWithInterval) + "," + String(shutterFadeInActive) + "," + String(shutterFadeOutActive));
+      SerialRPC.println("/fade:" + String(shutterFadePercent) + "," + String(shutterFadeFrames) + "," + String(shutterSyncWithInterval) + "," + String(shutterFadeInActive) + "," + String(shutterFadeOutActive) + "," + String(save));
       /*Clave: type, Valor: shutter
         Clave: fadeFrames, Valor: 50
         Clave: syncWithInterval, Valor: false
         Clave: fadeInActive, Valor: false
         Clave: fadeOutActive, Valor: false*/
     }
-  else if (type=="test_optics") 
+  else if ((type=="test_optics")||(type=="save_optics"))
     {
-      Serial.println("Optics");
+      Serial.println(type);
+      if (type=="save_optics") save = true;
+      else save = false;
       zoomValue = doc["zoomValue"];
       focusValue = doc["focusValue"];
       diaphragmValue = doc["diaphragmValue"];
       syncWithIntervalOptics = doc["syncWithInterval"];
-      SerialRPC.println("/optics:" + String(zoomValue) + "," + String(focusValue) + "," + String(diaphragmValue) + "," + String(syncWithIntervalOptics));
+      SerialRPC.println("/optics:" + String(zoomValue) + "," + String(focusValue) + "," + String(diaphragmValue) + "," + String(syncWithIntervalOptics) + "," + String(save));
 
       /*Clave: type, Valor: optics
       Clave: zoomValue, Valor: 50
@@ -220,30 +195,32 @@ void handlePostRequest(String body) {
       Clave: diaphragmValue, Valor: 1.9
       Clave: syncWithInterval, Valor: false*/
     }
-  else if (type=="test_360")
+  else if((type=="test_360")||(type=="save_360"))
     {
-      Serial.println("360");
+      Serial.println(type);
+      if (type=="save_360") save = true;
+      else save = false;
       String axis = doc["motor"];
       if (axis=="x0")
         {
           x0Degrees = doc["degrees"];
           x0Duration = doc["duration"];
           syncWithInterval360 = doc["syncWithInterval"];
-          command.println("/axisA:" + String(x0Degrees) + "," + String(x0Duration) + "," + String(syncWithInterval360));
+          command.println("/axisA:" + String(x0Degrees) + "," + String(x0Duration) + "," + String(syncWithInterval360) + "," + String(save));
         }
       else if (axis=="x1")  
         {
           x1Degrees = doc["degrees"];
           x1Duration = doc["duration"];
           syncWithInterval360 = doc["syncWithInterval"];
-          command.println("/axisX:" + String(x1Degrees) + "," + String(x1Duration) + "," + String(syncWithInterval360));
+          command.println("/axisX:" + String(x1Degrees) + "," + String(x1Duration) + "," + String(syncWithInterval360) + "," + String(save));
         }
       else if (axis=="y0")
         {
           y0Degrees = doc["degrees"];
           y0Duration = doc["duration"];
           syncWithInterval360 = doc["syncWithInterval"];
-          command.println("/axisY:" + String(y0Degrees) + "," + String(y0Duration) + "," + String(syncWithInterval360));
+          command.println("/axisY:" + String(y0Degrees) + "," + String(y0Duration) + "," + String(syncWithInterval360) + "," + String(save));
         }
       
       
@@ -255,7 +232,7 @@ void handlePostRequest(String body) {
     }
   else if (type=="accion") Serial.println("Accion");
   else if (type=="corten") Serial.println("Corten");
-  else if (type=="stop") SerialRPC.println("/s_motor:4," + String(motorDirection) + "," + String(0));
+  else if (type=="stop") SerialRPC.println("/s_motor:4," + String(motorDirection) + "," + String(0) + ", 0");
   else Serial.println("No reconocido");
   digitalWrite(LED_BUILTIN, HIGH);
 }
