@@ -185,7 +185,7 @@ void handlePostRequest(String body) {
       Clave: isIntervalActive, Valor: false
       Clave: direction, Valor: forward*/
     }
-  else if (type=="shutter") 
+  else if (type=="test_shutter") 
     {
       Serial.println("Shutter");
       /*shutterFadePercent = doc["fadePercent"];
@@ -205,7 +205,7 @@ void handlePostRequest(String body) {
         Clave: fadeInActive, Valor: false
         Clave: fadeOutActive, Valor: false*/
     }
-  else if (type=="optics") 
+  else if (type=="test_optics") 
     {
       Serial.println("Optics");
       zoomValue = doc["zoomValue"];
@@ -220,7 +220,7 @@ void handlePostRequest(String body) {
       Clave: diaphragmValue, Valor: 1.9
       Clave: syncWithInterval, Valor: false*/
     }
-  else if (type=="360")
+  else if (type=="test_360")
     {
       Serial.println("360");
       String axis = doc["motor"];

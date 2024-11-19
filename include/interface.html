@@ -129,8 +129,8 @@ const char *htmlTemplate = R"rawliteral(
             <input type='radio' id='forward' name='direction' value='forward' checked> Forward
             <input type='radio' id='backward' name='direction' value='backward'> Backward
             <br><br>
-            <button onclick="sendMotorCameraData()">Test</button>
-            <button onclick="saveMotorCameraData()">Save</button>
+            <button onclick="sendMotorCameraData('test_motor')">Test</button>
+            <button onclick="sendMotorCameraData('save_motor')">Save</button>
             <button onclick="stop()">Stop</button>
             <span id="motorCameraMessage" style="color: green; display: none;">Datos enviados correctamente</span>
         </div>
@@ -151,7 +151,8 @@ const char *htmlTemplate = R"rawliteral(
             <input type='checkbox' id='syncWithIntervalCheckbox'> Sincronizar con Intervalómetro
 
             <br><br>
-            <button onclick="sendShutterData()">Enviar Shutter</button>
+            <button onclick="sendShutterData('test_shutter')">Test</button>
+            <button onclick="sendShutterData('save_shutter')">Save</button>
             <span id="shutterMessage" style="color: green; display: none;">Datos enviados correctamente</span>
         </div>
 
@@ -186,7 +187,8 @@ const char *htmlTemplate = R"rawliteral(
             <br><br>
             <input type='checkbox' id='syncWithIntervalOptics'> Sincronizar con Intervalómetro
             <br><br>
-            <button onclick="sendOpticsData()">Enviar Óptica</button>
+            <button onclick="sendOpticsData('test_optics')">Test</button>
+            <button onclick="sendOpticsData('save_optics')">Save</button>
             <span id="opticsMessage" style="color: green; display: none;">Datos enviados correctamente</span>
         </div>
 
@@ -202,7 +204,8 @@ const char *htmlTemplate = R"rawliteral(
             <label for='x0Duration'>Duración (s):</label>
             <input type='text' id='x0Duration'>
             <br>
-            <button onclick="moveMotor('x0')">Mover X0</button>
+            <button onclick="moveMotor('test_360','x0')">Test</button>
+            <button onclick="moveMotor('save_360','x0')">Save</button>
             <span id="x0Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
             <br><br>
 
@@ -213,7 +216,8 @@ const char *htmlTemplate = R"rawliteral(
             <label for='x1Duration'>Duración (s):</label>
             <input type='text' id='x1Duration'>
             <br>
-            <button onclick="moveMotor('x1')">Mover X1</button>
+            <button onclick="moveMotor('test_360','x1')">Test</button>
+            <button onclick="moveMotor('save_360','x1')">Save</button>
             <span id="x1Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
             <br><br>
 
@@ -224,7 +228,8 @@ const char *htmlTemplate = R"rawliteral(
             <label for='y0Duration'>Duración (s):</label>
             <input type='text' id='y0Duration'>
             <br>
-            <button onclick="moveMotor('y0')">Mover Y0</button>
+            <button onclick="moveMotor('test_360','y0')">Test</button>
+            <button onclick="moveMotor('save_360','y0')">Save</button>
             <span id="y0Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
             <br><br>
             <input type='checkbox' id='syncWithInterval360'> Sincronizar con Intervalómetro
@@ -260,35 +265,9 @@ const char *htmlTemplate = R"rawliteral(
             }
           }
 
-          function save_MotorCameraData() {
+          function sendMotorCameraData(type_mode) {
             const motorData = {
-              type: 'save_motor',
-              /*speedValue: document.getElementById('speedSlider').value,
-              isSpeedActive: document.getElementById('speedCheckbox').checked,
-              intervalFrames: document.getElementById('intervalFrames').value,
-              intervalSeconds: document.getElementById('intervalSeconds').value,
-              isIntervalActive: document.getElementById('intervalCheckbox').checked,
-              direction: document.querySelector('input[name="direction"]:checked').value*/
-              0: document.getElementById('speedSlider').value,
-              1: document.getElementById('speedCheckbox').checked,
-              2: document.getElementById('intervalFrames').value,
-              3: document.getElementById('intervalSeconds').value,
-              4: document.getElementById('intervalCheckbox').checked,
-              5: document.querySelector('input[name="direction"]:checked').value
-            };
-            fetch('/updateMotorCamera', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(motorData),
-            })
-              .then(response => response.text())
-              .then(() => showMessage('motorCameraMessage'))
-              .catch(error => console.error('Motor Camera Error:', error));
-          }
-
-          function sendMotorCameraData() {
-            const motorData = {
-              type: 'test_motor',
+              type: type_mode,
               /*speedValue: document.getElementById('speedSlider').value,
               isSpeedActive: document.getElementById('speedCheckbox').checked,
               intervalFrames: document.getElementById('intervalFrames').value,
@@ -327,9 +306,9 @@ const char *htmlTemplate = R"rawliteral(
               .catch(error => console.error('Stop Error:', error));
           }
 
-          function sendShutterData() {
+          function sendShutterData(type_mode) {
             const shutterData = {
-              type: 'shutter',
+              type: type_mode,
               /*fadePercent: document.getElementById('fadePercentSlider').value, 
               fadeFrames: document.getElementById('fadeFramesSlider').value,
               syncWithInterval: document.getElementById('syncWithIntervalCheckbox').checked,
@@ -351,9 +330,9 @@ const char *htmlTemplate = R"rawliteral(
               .catch(error => console.error('Shutter Error:', error));
           }
 
-          function sendOpticsData() {
+          function sendOpticsData(type_mode) {
             const opticsData = {
-              type: 'optics',
+              type: type_mode,
               zoomValue: document.getElementById('zoomSlider').value,
               focusValue: document.getElementById('focusSlider').value,
               diaphragmValue: document.getElementById('diaphragmSelect').value,
@@ -369,13 +348,13 @@ const char *htmlTemplate = R"rawliteral(
               .catch(error => console.error('Optics Error:', error));
           }
 
-          function moveMotor(motor) {
+          function moveMotor(type_mode, motor) {
             const degrees = document.getElementById(`${motor}Degrees`).value;
             const duration = document.getElementById(`${motor}Duration`).value;
             const syncWithInterval = document.getElementById('syncWithInterval360').checked;
 
             const motorData = {
-              type: '360',
+              type: type_mode,
               motor: motor,
               degrees: degrees,
               duration: duration,
@@ -390,7 +369,7 @@ const char *htmlTemplate = R"rawliteral(
               .then(() => showMessage(`${motor}Message`))
               .catch(error => console.error('Motor Error:', error));
           }
-
+          
           function accion() {
 
             const accionData = {
