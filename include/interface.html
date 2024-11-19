@@ -1,0 +1,435 @@
+// Plantilla HTML
+const char *htmlTemplate = R"rawliteral(
+      <html>
+
+      <head>
+        <meta charset='UTF-8'>
+        <style>
+            /* Tema oscuro básico */
+            body {
+                background-color: #121212;
+                color: #ffffff;
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+
+            h2 {
+                color: #cccccc; /* Gris claro */
+                font-size: 32px;
+                border-bottom: 2px solid #555555; /* Un borde gris medio */
+                padding-bottom: 5px;
+                margin-bottom: 20px;
+            }
+
+            h3 {
+                color: #bbbbbb; /* Gris medio-claro */
+                font-size: 20px;
+                margin-top: 30px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #444444; /* Un borde gris oscuro */
+            }
+
+            h4 {
+                color: #dddddd; /* Blanco roto o gris muy claro */
+                font-size: 18px;
+                margin-top: 20px;
+            }
+
+            /* Estilos de los inputs */
+            input[type="text"],
+            input[type="number"],
+            select {
+                width: 100px;
+                padding: 5px;
+                margin: 5px 0;
+                background-color: #333;
+                border: 1px solid #555;
+                color: #fff;
+                border-radius: 5px;
+            }
+
+            /* Estilos del checkbox y radio */
+            input[type="checkbox"],
+            input[type="radio"] {
+                margin: 10px;
+            }
+
+            /* Estilo de los sliders */
+            input[type="range"] {
+                width: 30%;
+                margin: 10px 0;
+            }
+
+            /* Botones */
+            button {
+                background-color: #1e88e5;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 10px 2px;
+                cursor: pointer;
+                border-radius: 5px;
+                transition: background-color 0.3s ease;
+            }
+
+            button:hover {
+                background-color: #1565c0;
+            }
+
+
+            /* Dark styling for select dropdown */
+            select {
+                background-color: #333;
+                color: white;
+                border: 1px solid #555;
+                padding: 5px;
+            }
+
+            /* Estilo para contenedores de secciones */
+            .section {
+                background-color: #1e1e1e;
+                padding: 20px;
+                padding-top: 0px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                border: 1px solid #333; /* Bordes más visibles */
+            }
+
+            /* Estilo para centrar los formularios en la pantalla */
+            .form-container {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        </style>
+      </head>
+
+      <body>
+        <div class="form-container">
+        <h2>Control Bolex Paillard</h2>
+        <div class="section">
+            <!-- Sección Motor Cámara -->
+            <h3>Motor Cámara</h3>
+            <h4>Speed</h4>
+            <p><span id='speedValueDisplay'>25</span> fps</p>
+            <input type='range' min='0' max='50' value='25' id='speedSlider'>
+            <input type='checkbox' id='speedCheckbox'> Activar Speed
+
+            <h4>Intervalómetro:</h4>
+            <label for='intervalFrames'>Frames:</label>
+            <input type='number' id='intervalFrames' value='1' min='1'>
+            <label for='intervalSeconds'>Segundos:</label>
+            <input type='number' id='intervalSeconds' value='1' min='1'>
+            <input type='checkbox' id='intervalCheckbox'> Activar Intervalómetro
+
+            <h4>Dirección:</h4>
+            <input type='radio' id='forward' name='direction' value='forward' checked> Forward
+            <input type='radio' id='backward' name='direction' value='backward'> Backward
+            <br><br>
+            <button onclick="sendMotorCameraData()">Test</button>
+            <button onclick="saveMotorCameraData()">Save</button>
+            <button onclick="stop()">Stop</button>
+            <span id="motorCameraMessage" style="color: green; display: none;">Datos enviados correctamente</span>
+        </div>
+
+        <div class="section">
+            <!-- Sección Shutter -->
+            <h3>Shutter</h3>
+            <h4>Fade In/Out Frames:</h4>
+            <p>% apertura: <span id='fadePercentDisplay'>50</span></p>
+            <input type='range' min='0' max='100' value='50' id='fadePercentSlider'>
+            <p>Número de frames: <span id='fadeFramesDisplay'>50</span></p>
+            <input type='range' min='0' max='100' value='50' id='fadeFramesSlider'>
+
+            <h4>Fade Activación:</h4>
+            <input type='checkbox' id='fadeInCheckbox'> Activar Fade In
+            <input type='checkbox' id='fadeOutCheckbox'> Activar Fade Out
+            <br><br>
+            <input type='checkbox' id='syncWithIntervalCheckbox'> Sincronizar con Intervalómetro
+
+            <br><br>
+            <button onclick="sendShutterData()">Enviar Shutter</button>
+            <span id="shutterMessage" style="color: green; display: none;">Datos enviados correctamente</span>
+        </div>
+
+        <div class="section">
+            <!-- Sección Monitor de Cámara -->
+            <h3>Monitor de Cámara</h3>
+            <iframe src="http://192.168.8.5:8000" width="100%" height="400px" style="border: none;"></iframe>
+        </div>
+
+        <div class="section">
+            <!-- Sección Óptica -->
+            <h3>Óptica</h3>
+            <h4>Zoom:</h4>
+            <p>Valor de zoom: <span id='zoomValueDisplay'>50</span></p>
+            <input type='range' min='0' max='100' value='50' id='zoomSlider'>
+
+            <h4>Foco:</h4>
+            <p>Valor de foco: <span id='focusValueDisplay'>50</span></p>
+            <input type='range' min='0' max='100' value='50' id='focusSlider'>
+
+            <h4>Diafragma:</h4>
+            <select id='diaphragmSelect'>
+            <option value='1.9'>1.9</option>
+            <option value='2.2'>2.2</option>
+            <option value='4'>4</option>
+            <option value='5.6'>5.6</option>
+            <option value='8'>8</option>
+            <option value='11'>11</option>
+            <option value='16'>16</option>
+            <option value='22'>22</option>
+            </select>
+            <br><br>
+            <input type='checkbox' id='syncWithIntervalOptics'> Sincronizar con Intervalómetro
+            <br><br>
+            <button onclick="sendOpticsData()">Enviar Óptica</button>
+            <span id="opticsMessage" style="color: green; display: none;">Datos enviados correctamente</span>
+        </div>
+
+        <div class="section">
+            <!-- Sección Dispositivo 360 -->
+            <h3>Dispositivo 360</h3>
+            
+
+            <!-- Subsección X0 -->
+            <h4>X0:</h4>
+            <label for='x0Degrees'>Grados:</label>
+            <input type='text' id='x0Degrees'>
+            <label for='x0Duration'>Duración (s):</label>
+            <input type='text' id='x0Duration'>
+            <br>
+            <button onclick="moveMotor('x0')">Mover X0</button>
+            <span id="x0Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
+            <br><br>
+
+            <!-- Subsección X1 -->
+            <h4>X1:</h4>
+            <label for='x1Degrees'>Grados:</label>
+            <input type='text' id='x1Degrees'>
+            <label for='x1Duration'>Duración (s):</label>
+            <input type='text' id='x1Duration'>
+            <br>
+            <button onclick="moveMotor('x1')">Mover X1</button>
+            <span id="x1Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
+            <br><br>
+
+            <!-- Subsección Y0 -->
+            <h4>Y0:</h4>
+            <label for='y0Degrees'>Grados:</label>
+            <input type='text' id='y0Degrees'>
+            <label for='y0Duration'>Duración (s):</label>
+            <input type='text' id='y0Duration'>
+            <br>
+            <button onclick="moveMotor('y0')">Mover Y0</button>
+            <span id="y0Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
+            <br><br>
+            <input type='checkbox' id='syncWithInterval360'> Sincronizar con Intervalómetro
+            <br><br>
+        </div>
+
+        <div class="section">
+            <!-- Sección Rodaje -->
+            <h3>Rodaje</h3>
+            <button onclick="accion()">ACCIÓN !!!</button>
+            <button onclick="corten()">CORTEN !!!</button>
+            <span id="accionMessage" style="color: green; display: none;">Mensaje enviado correctamente</span>
+            <br><br>
+        </div>
+        </div>
+        <!-- Script para manejar las interacciones y enviar el JSON -->
+        <script>
+          function updateDisplay() {
+            document.getElementById('speedValueDisplay').innerText = document.getElementById('speedSlider').value;
+            document.getElementById('fadePercentDisplay').innerText = document.getElementById('fadePercentSlider').value;
+            document.getElementById('fadeFramesDisplay').innerText = document.getElementById('fadeFramesSlider').value;
+            document.getElementById('zoomValueDisplay').innerText = document.getElementById('zoomSlider').value;
+            document.getElementById('focusValueDisplay').innerText = document.getElementById('focusSlider').value;
+          }
+
+          function showMessage(elementId) {
+            const messageElement = document.getElementById(elementId);
+            if (messageElement) {
+              messageElement.style.display = 'inline';
+              setTimeout(() => {
+                messageElement.style.display = 'none';
+              }, 3000); // Mostrar el mensaje durante 3 segundos
+            }
+          }
+
+          function save_MotorCameraData() {
+            const motorData = {
+              type: 'save_motor',
+              /*speedValue: document.getElementById('speedSlider').value,
+              isSpeedActive: document.getElementById('speedCheckbox').checked,
+              intervalFrames: document.getElementById('intervalFrames').value,
+              intervalSeconds: document.getElementById('intervalSeconds').value,
+              isIntervalActive: document.getElementById('intervalCheckbox').checked,
+              direction: document.querySelector('input[name="direction"]:checked').value*/
+              0: document.getElementById('speedSlider').value,
+              1: document.getElementById('speedCheckbox').checked,
+              2: document.getElementById('intervalFrames').value,
+              3: document.getElementById('intervalSeconds').value,
+              4: document.getElementById('intervalCheckbox').checked,
+              5: document.querySelector('input[name="direction"]:checked').value
+            };
+            fetch('/updateMotorCamera', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(motorData),
+            })
+              .then(response => response.text())
+              .then(() => showMessage('motorCameraMessage'))
+              .catch(error => console.error('Motor Camera Error:', error));
+          }
+
+          function sendMotorCameraData() {
+            const motorData = {
+              type: 'test_motor',
+              /*speedValue: document.getElementById('speedSlider').value,
+              isSpeedActive: document.getElementById('speedCheckbox').checked,
+              intervalFrames: document.getElementById('intervalFrames').value,
+              intervalSeconds: document.getElementById('intervalSeconds').value,
+              isIntervalActive: document.getElementById('intervalCheckbox').checked,
+              direction: document.querySelector('input[name="direction"]:checked').value*/
+              0: document.getElementById('speedSlider').value,
+              1: document.getElementById('speedCheckbox').checked,
+              2: document.getElementById('intervalFrames').value,
+              3: document.getElementById('intervalSeconds').value,
+              4: document.getElementById('intervalCheckbox').checked,
+              5: document.querySelector('input[name="direction"]:checked').value
+            };
+            fetch('/updateMotorCamera', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(motorData),
+            })
+              .then(response => response.text())
+              .then(() => showMessage('motorCameraMessage'))
+              .catch(error => console.error('Motor Camera Error:', error));
+          }
+
+          function stop() {
+
+            const accionData = {
+              type: 'stop',
+            };
+            fetch('/stop', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(accionData),
+            })
+              .then(response => response.text())
+              .then(() => showMessage('motorCameraMessage'))
+              .catch(error => console.error('Stop Error:', error));
+          }
+
+          function sendShutterData() {
+            const shutterData = {
+              type: 'shutter',
+              /*fadePercent: document.getElementById('fadePercentSlider').value, 
+              fadeFrames: document.getElementById('fadeFramesSlider').value,
+              syncWithInterval: document.getElementById('syncWithIntervalCheckbox').checked,
+              fadeInActive: document.getElementById('fadeInCheckbox').checked,
+              fadeOutActive: document.getElementById('fadeOutCheckbox').checked*/
+              0: document.getElementById('fadePercentSlider').value, 
+              1: document.getElementById('fadeFramesSlider').value,
+              2: document.getElementById('syncWithIntervalCheckbox').checked,
+              3: document.getElementById('fadeInCheckbox').checked,
+              4: document.getElementById('fadeOutCheckbox').checked
+            };
+            fetch('/updateShutter', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(shutterData),
+            })
+              .then(response => response.text())
+              .then(() => showMessage('shutterMessage'))
+              .catch(error => console.error('Shutter Error:', error));
+          }
+
+          function sendOpticsData() {
+            const opticsData = {
+              type: 'optics',
+              zoomValue: document.getElementById('zoomSlider').value,
+              focusValue: document.getElementById('focusSlider').value,
+              diaphragmValue: document.getElementById('diaphragmSelect').value,
+              syncWithInterval: document.getElementById('syncWithIntervalOptics').checked
+            };
+            fetch('/updateOptics', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(opticsData),
+            })
+              .then(response => response.text())
+              .then(() => showMessage('opticsMessage'))
+              .catch(error => console.error('Optics Error:', error));
+          }
+
+          function moveMotor(motor) {
+            const degrees = document.getElementById(`${motor}Degrees`).value;
+            const duration = document.getElementById(`${motor}Duration`).value;
+            const syncWithInterval = document.getElementById('syncWithInterval360').checked;
+
+            const motorData = {
+              type: '360',
+              motor: motor,
+              degrees: degrees,
+              duration: duration,
+              syncWithInterval: syncWithInterval
+            };
+            fetch('/moveMotor360', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(motorData),
+            })
+              .then(response => response.text())
+              .then(() => showMessage(`${motor}Message`))
+              .catch(error => console.error('Motor Error:', error));
+          }
+
+          function accion() {
+
+            const accionData = {
+              type: 'accion',
+            };
+            fetch('/accion', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(accionData),
+            })
+              .then(response => response.text())
+              .then(() => showMessage('accionMessage'))
+              .catch(error => console.error('Accion Error:', error));
+          }
+
+          function corten() {
+
+            const accionData = {
+              type: 'corten',
+            };
+            fetch('/corten', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(accionData),
+            })
+              .then(response => response.text())
+              .then(() => showMessage('accionMessage'))
+              .catch(error => console.error('Corten Error:', error));
+          }
+
+          // Actualizar la interfaz al cambiar los sliders
+          document.getElementById('speedSlider').addEventListener('input', updateDisplay);
+          document.getElementById('fadePercentSlider').addEventListener('input', updateDisplay);
+          document.getElementById('fadeFramesSlider').addEventListener('input', updateDisplay);
+          document.getElementById('zoomSlider').addEventListener('input', updateDisplay);
+          document.getElementById('focusSlider').addEventListener('input', updateDisplay);
+        </script>
+
+      </body>
+
+      </html>
+      )rawliteral";
