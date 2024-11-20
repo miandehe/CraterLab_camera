@@ -181,7 +181,7 @@ void fps_count_state() {
     {
       lastTimeDebounce = micros();
       closed = false;
-      config_speed_motor(4, !motorDirection, 100);
+      //config_speed_motor(4, !motorDirection, 100);
       force_stop = true;      
     }
 }
@@ -226,25 +226,17 @@ void config_optics(int zoomValue, int focusValue, int diaphragmValue, int syncWi
 void secure_stop(int direction)
   {
     config_speed_motor(4, direction, 0);
+    delay(100);
     if (!digitalRead(20))
         {
           config_speed_motor(4, direction, 100);
           closed = true;
-          //while(!digitalRead(20))config_speed_motor(4, direction, 100);
-          //config_speed_motor(4, direction, 0);
-        }
-    //config_speed_motor(4, direction, 0);
-    
+        }  
   }
 
 void next_frame(int direction)
   {
-    for(int i=255; i>=90; i--) 
-      {
-        config_speed_motor(4, direction, i);
-        delayMicroseconds(20);
-        //delayMicroseconds(100);
-      }
+    config_speed_motor(4, motorDirection, 100);
     closed = true;
   }
 
@@ -588,6 +580,7 @@ void loop()
  refresh_interval_motors();
  if(force_stop)
   {
+    config_speed_motor(4, !motorDirection, 100);
     delay(10);
     stop(4);
     force_stop = false;
