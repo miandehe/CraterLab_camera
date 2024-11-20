@@ -244,10 +244,12 @@ void loop() {
         char c = client.read();
         request += c;
 
+        // Identificar si es una solicitud POST
         if (request.indexOf("POST") >= 0) {
           isPostRequest = true;
         }
 
+        // Si se encuentra el final de la solicitud
         if (c == '\n' && request.endsWith("\r\n\r\n")) {
           Serial.println("Solicitud recibida:");
           Serial.println(request);
@@ -261,7 +263,7 @@ void loop() {
             Serial.println("Cuerpo del mensaje recibido:");
             Serial.println(body);
 
-            // Llamamos a la función genérica para procesar la petición POST
+            // Llamamos a la función para procesar la petición POST
             handlePostRequest(body);
 
             // Respuesta al cliente
@@ -269,7 +271,15 @@ void loop() {
             client.println("Content-type:text/plain");
             client.println();
             client.println("Datos enviados correctamente");
+          } else if (request.indexOf("GET /motorSpeed") >= 0) { // actualiza fps en interface
+            // Respuesta para la ruta /motorSpeed
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-Type: application/json");
+            client.println();
+            String response = "{\"motorSpeedRead\": " + String(motorSpeedRead) + "}";
+            client.print(response); 
           } else {
+            // Respuesta para servir la interfaz HTML
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println();
@@ -283,17 +293,13 @@ void loop() {
     Serial.println("Cliente desconectado");
   }
 
+  // Leer datos del RPC
   String buffer = "";
-
   while (RPC.available()) {
-
-    buffer += (char)RPC.read();  // Fill the buffer with characters
-
+    buffer += (char)RPC.read();
   }
 
   if (buffer.length() > 0) {
-
     Serial.print(buffer);
-
   }
 }
