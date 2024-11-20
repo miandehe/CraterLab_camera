@@ -3,11 +3,10 @@
 //#include <PID_v1.h> 
 //#include <SPI.h>
 #include <RPC.h>
-#include "SerialRPC.h"
 #include "constants.h"
 
 #define DEBUG_M4 true
-
+#define MIN_SPEED 110
 // Inicializando RTOS
 using namespace rtos;
 Thread sensorThread;
@@ -34,6 +33,7 @@ float diaphragmValue = 1.8;
 bool syncWithIntervalOptics = false;
 
 bool closed=false;
+bool isAction=false;
 
 #if PID_ENABLE
   // ************************************************ Variables PID *****************************************************************
@@ -173,7 +173,7 @@ void fps_count_state() {
       time_fps = micros();
       if((millis()-time_sec)>=1000)
         {
-          //Serial.println(fps_read);
+          //RPC.println(fps_read);
           time_sec = millis();
         }
     }
@@ -181,7 +181,6 @@ void fps_count_state() {
     {
       lastTimeDebounce = micros();
       closed = false;
-      //config_speed_motor(4, !motorDirection, 100);
       force_stop = true;      
     }
 }
@@ -203,13 +202,10 @@ void config_interval_motor(int motor, int direction, int Frames, int Seconds) //
 
 float inc_position_fade = 0;
 int fade_direction = 0;
-bool SyncFadeWithInterval = false;
 
-void config_automatic_fade(int shutterFadePercent, int shutterFadeFrames, int shutterSyncWithInterval, int shutterFadeInActive, int shutterFadeOutActive) //Configuracion fade
+void config_automatic_fade(int shutterFadeFrames, int shutterSyncWithInterval, int shutterFadeInActive, int shutterFadeOutActive) //Configuracion fade
   {
-    config_position_motor(0, shutterFadePercent);
-    inc_position_fade = 100/(float)shutterFadeFrames;
-    SyncFadeWithInterval = shutterSyncWithInterval;
+    inc_position_fade = abs(100-position_motor[0])/(float)shutterFadeFrames;
     if((shutterFadeInActive)&&(!shutterFadeOutActive)) fade_direction=IN;
     else if((!shutterFadeInActive)&&(shutterFadeOutActive)) fade_direction=OUT;
     else if((shutterFadeInActive)&&(shutterFadeOutActive)) fade_direction=IN_OUT;
@@ -226,17 +222,17 @@ void config_optics(int zoomValue, int focusValue, int diaphragmValue, int syncWi
 void secure_stop(int direction)
   {
     config_speed_motor(4, direction, 0);
-    delay(100);
+    delay(150);
     if (!digitalRead(20))
         {
-          config_speed_motor(4, direction, 100);
+          config_speed_motor(4, direction, MIN_SPEED);
           closed = true;
         }  
   }
 
 void next_frame(int direction)
   {
-    config_speed_motor(4, motorDirection, 100);
+    config_speed_motor(4, motorDirection, MIN_SPEED);
     closed = true;
   }
 
@@ -267,11 +263,11 @@ void refresh_position_motors()
 
 void refresh_interval_motors()
   {
-    if(((millis()-time_interval_count[4])>=interval_time[4])&&(interval_frames[4]!=frames_count[4]))
+    if((((millis()-time_interval_count[4])>=interval_time[4])&&(interval_frames[4]!=frames_count[4]))&&(isAction))
       {
         frames_count[4]++;
         time_interval_count[4] = millis();
-        if (SyncFadeWithInterval)
+        if (shutterSyncWithInterval)
           {
             float value_position=0;
             if(fade_direction==IN)
@@ -332,36 +328,14 @@ char c_rpc;
 String inputString_rpc;
 unsigned long time_led = millis();
 
-/*
-// Motor
-int motorSpeedValue = 25;
-bool motorIsSpeedActive = false;
-int motorIntervalFrames = 1;
-int motorIntervalSeconds = 1;
-bool motorIsIntervalActive = false;
-int motorDirection = 1;
-
-// Shutter
-int shutterFadePercent = 0;
-int shutterFadeFrames = 50;
-bool shutterSyncWithInterval = false;
-bool shutterFadeInActive = false;
-bool shutterFadeOutActive = false;
-
-// Óptica
-int zoomValue = 50;
-int focusValue = 50;
-float diaphragmValue = 1.8;
-bool syncWithIntervalOptics = false;*/
-
 void RPCRead()
   {
      ////////////////////////////////////////////////////////////
      /////// RUTINA TRATAMIENTO DE STRINGS DEL UART   ///////////
      ////////////////////////////////////////////////////////////
-     if (SerialRPC.available())
+     if (RPC.available())
        {
-         c_rpc = SerialRPC.read();
+         c_rpc = RPC.read();
          if ((c_rpc == '\r') || (c_rpc == '\n'))
          {
           digitalWrite(LED_BUILTIN, LOW);
@@ -369,8 +343,8 @@ void RPCRead()
            {
               int* value = decode_values(inputString_rpc, 4);
               #if DEBUG_M4
-                SerialRPC.print("Recibido Speed M4: ");
-                SerialRPC.println(inputString_rpc);
+                RPC.print("Recibido Speed M4: ");
+                RPC.println(inputString_rpc);
                 for(int i=0; i<4; i++) RPC.println(value[i]);
               #endif
               motorDirection = value[1];
@@ -380,7 +354,11 @@ void RPCRead()
               if (motorSpeedValue>0) motorSpeedValue = map(motorSpeedValue, 24, 48, 146, 192); //Fake fps
               if (value[3]==false) //Si es falso, se ejecuta, sino se guarda sin ejecutar
                 {
-                  if (motorSpeedValue==0) secure_stop(motorDirection);
+                  if (motorSpeedValue==0)
+                    {
+                      isAction = false;
+                      secure_stop(motorDirection);
+                    } 
                   else config_speed_motor(value[0], motorDirection, motorSpeedValue);
                 }
             }
@@ -388,8 +366,8 @@ void RPCRead()
            {
               int* value = decode_values(inputString_rpc, 5);
               #if DEBUG_M4
-                SerialRPC.print("Recibido Interval M4: ");
-                SerialRPC.println(inputString_rpc);
+                RPC.print("Recibido Interval M4: ");
+                RPC.println(inputString_rpc);
                 for(int i=0; i<5; i++) RPC.println(value[i]);
               #endif
               motorDirection = value[1];
@@ -399,6 +377,7 @@ void RPCRead()
               motorIsSpeedActive = false;
               if (value[4]==false) //Si es falso, se ejecuta, sino se guarda sin ejecutar
                 {
+                  isAction = true;
                   config_interval_motor(value[0], motorDirection, motorIntervalFrames, motorIntervalSeconds);
                 }
               
@@ -407,8 +386,8 @@ void RPCRead()
            {
               int* value = decode_values(inputString_rpc, 6);
               #if DEBUG_M4
-                SerialRPC.print("Recibido fade M4: ");
-                SerialRPC.println(inputString_rpc);
+                RPC.print("Recibido fade M4: ");
+                RPC.println(inputString_rpc);
                 for(int i=0; i<6; i++) RPC.println(value[i]);
               #endif
               shutterFadePercent = value[0];
@@ -416,17 +395,14 @@ void RPCRead()
               shutterSyncWithInterval = value[2];
               shutterFadeInActive = value[3];
               shutterFadeOutActive = value[4];
-              if (value[5]==false) //Si es falso, se ejecuta, sino se guarda sin ejecutar
-                {
-                  config_automatic_fade(shutterFadePercent, shutterFadeFrames, shutterSyncWithInterval, shutterFadeInActive, shutterFadeOutActive);
-                }
+              config_position_motor(0, shutterFadePercent);
             }
           else if (inputString_rpc.startsWith("/optics:")) //Optics configuration
            {
               int* value = decode_values(inputString_rpc, 5);
               #if DEBUG_M4
-                SerialRPC.print("Recibido optics M4: ");
-                SerialRPC.println(inputString_rpc);
+                RPC.print("Recibido optics M4: ");
+                RPC.println(inputString_rpc);
                 for(int i=0; i<5; i++) RPC.println(value[i]);
               #endif
               zoomValue = value[0];
@@ -436,6 +412,26 @@ void RPCRead()
               if (value[4]==false) //Si es falso, se ejecuta, sino se guarda sin ejecutar
                 {
                   config_optics(zoomValue, focusValue, diaphragmValue, syncWithIntervalOptics);
+                }
+            }
+          else if (inputString_rpc.startsWith("/action:")) //Optics configuration
+           {
+              int* value = decode_values(inputString_rpc, 1);
+              #if DEBUG_M4
+                RPC.print("Recibido action M4: ");
+                RPC.println(inputString_rpc);
+                for(int i=0; i<1; i++) RPC.println(value[i]);
+              #endif
+              isAction=value[0];
+              if (isAction)
+                {
+                  if (motorIsSpeedActive)  config_speed_motor(4, motorDirection, motorSpeedValue);
+                  else config_interval_motor(4, motorDirection, motorIntervalFrames, motorIntervalSeconds);
+                  config_automatic_fade(shutterFadeFrames, shutterSyncWithInterval, shutterFadeInActive, shutterFadeOutActive);
+                }
+              else
+                {
+                  secure_stop(motorDirection);
                 }
             }
            inputString_rpc = String();
@@ -517,7 +513,7 @@ void SerialRead()
 
 void setup() {
   //SCB_CleanDCache();
-  SerialRPC.begin();
+  RPC.begin();
   //delay(5000);
   pinMode(20, INPUT_PULLUP);
   pinMode(sr_enable, OUTPUT);
@@ -570,18 +566,12 @@ void loop()
     analogWrite(EN_MOTOR[4], abs(Output)); // Por el primer pin sale la señal PWM.
     */
   #endif
- //config_smotor(4, 1, 146); //24 fps
- //config_smotor(4, 1, 192); //48 fps
- 
- //adjust_fps();
- //RPCRead();
- //SerialRead();
  refresh_position_motors();
  refresh_interval_motors();
  if(force_stop)
   {
-    config_speed_motor(4, !motorDirection, 100);
-    delay(10);
+    config_speed_motor(4, !motorDirection, MIN_SPEED);
+    delay(20);
     stop(4);
     force_stop = false;
   }

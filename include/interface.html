@@ -139,7 +139,7 @@ const char *htmlTemplate = R"rawliteral(
             <!-- Sección Shutter -->
             <h3>Shutter</h3>
             <h4>Fade In/Out Frames:</h4>
-            <p>% apertura: <span id='fadePercentDisplay'>50</span></p>
+            <p>% apertura inicial: <span id='fadePercentDisplay'>50</span></p>
             <input type='range' min='0' max='100' value='50' id='fadePercentSlider'>
             <p>Número de frames: <span id='fadeFramesDisplay'>50</span></p>
             <input type='range' min='0' max='100' value='50' id='fadeFramesSlider'>
@@ -151,7 +151,6 @@ const char *htmlTemplate = R"rawliteral(
             <input type='checkbox' id='syncWithIntervalCheckbox'> Sincronizar con Intervalómetro
 
             <br><br>
-            <button onclick="sendShutterData('test_shutter')">Test</button>
             <button onclick="sendShutterData('save_shutter')">Save</button>
             <span id="shutterMessage" style="color: green; display: none;">Datos enviados correctamente</span>
         </div>

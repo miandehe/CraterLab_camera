@@ -4,7 +4,7 @@
 #include "interface.html"
 #include "constants.h"
 #include <RPC.h>
-#include "SerialRPC.h"
+#include "RPC.h"
 
 #define AP_MODE false
 
@@ -71,7 +71,7 @@ void setup()
   command.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
   delay(5000);
-  if (!SerialRPC.begin()) {
+  if (!RPC.begin()) {
     Serial.println("RPC initialization fail");
   }
 
@@ -142,11 +142,11 @@ void handlePostRequest(String body) {
       else if (Direction=="backward") motorDirection = BACKWARD;
       if(motorIsSpeedActive)
         {
-          SerialRPC.println("/s_motor:4," + String(motorDirection) + "," + String(motorSpeedValue) + "," + String(save));
+          RPC.println("/s_motor:4," + String(motorDirection) + "," + String(motorSpeedValue) + "," + String(save));
         }
       else if(motorIsIntervalActive)
         {
-          SerialRPC.println("/i_motor:4," + String(motorDirection) + "," + String(motorIntervalFrames) + "," + String(motorIntervalSeconds) + "," + String(save));
+          RPC.println("/i_motor:4," + String(motorDirection) + "," + String(motorIntervalFrames) + "," + String(motorIntervalSeconds) + "," + String(save));
         }   
       /*Clave: type, Valor: motor
       Clave: speedValue, Valor: )25
@@ -171,12 +171,7 @@ void handlePostRequest(String body) {
       shutterSyncWithInterval = doc["2"];
       shutterFadeInActive = doc["3"];
       shutterFadeOutActive = doc["4"];
-      SerialRPC.println("/fade:" + String(shutterFadePercent) + "," + String(shutterFadeFrames) + "," + String(shutterSyncWithInterval) + "," + String(shutterFadeInActive) + "," + String(shutterFadeOutActive) + "," + String(save));
-      /*Clave: type, Valor: shutter
-        Clave: fadeFrames, Valor: 50
-        Clave: syncWithInterval, Valor: false
-        Clave: fadeInActive, Valor: false
-        Clave: fadeOutActive, Valor: false*/
+      RPC.println("/fade:" + String(shutterFadePercent) + "," + String(shutterFadeFrames) + "," + String(shutterSyncWithInterval) + "," + String(shutterFadeInActive) + "," + String(shutterFadeOutActive) + "," + String(save));
     }
   else if ((type=="test_optics")||(type=="save_optics"))
     {
@@ -187,13 +182,7 @@ void handlePostRequest(String body) {
       focusValue = doc["focusValue"];
       diaphragmValue = doc["diaphragmValue"];
       syncWithIntervalOptics = doc["syncWithInterval"];
-      SerialRPC.println("/optics:" + String(zoomValue) + "," + String(focusValue) + "," + String(diaphragmValue) + "," + String(syncWithIntervalOptics) + "," + String(save));
-
-      /*Clave: type, Valor: optics
-      Clave: zoomValue, Valor: 50
-      Clave: focusValue, Valor: 50
-      Clave: diaphragmValue, Valor: 1.9
-      Clave: syncWithInterval, Valor: false*/
+      RPC.println("/optics:" + String(zoomValue) + "," + String(focusValue) + "," + String(diaphragmValue) + "," + String(syncWithIntervalOptics) + "," + String(save));
     }
   else if((type=="test_360")||(type=="save_360"))
     {
@@ -222,17 +211,20 @@ void handlePostRequest(String body) {
           syncWithInterval360 = doc["syncWithInterval"];
           command.println("/axisY:" + String(y0Degrees) + "," + String(y0Duration) + "," + String(syncWithInterval360) + "," + String(save));
         }
-      
-      
-      /*Clave: type, Valor: 360
-      Clave: motor, Valor: x0, x1, y0
-      Clave: degrees, Valor:
-      Clave: duration, Valor:
-      Clave: syncWithInterval, Valor: false*/
     }
-  else if (type=="accion") Serial.println("Accion");
-  else if (type=="corten") Serial.println("Corten");
-  else if (type=="stop") SerialRPC.println("/s_motor:4," + String(motorDirection) + "," + String(0) + ", 0");
+  else if (type=="accion")
+    {
+      Serial.println(type);
+      RPC.println("/action:" + String(1));
+      command.println("/action:" + String(1));
+    }
+  else if (type=="corten")
+    {
+      Serial.println(type);
+      RPC.println("/action:" + String(0));
+      command.println("/action:" + String(0));
+    }
+  else if (type=="stop") RPC.println("/s_motor:4," + String(motorDirection) + "," + String(0) + ", 0");
   else Serial.println("No reconocido");
   digitalWrite(LED_BUILTIN, HIGH);
 }
