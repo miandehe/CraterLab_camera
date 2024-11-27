@@ -283,6 +283,7 @@ void refresh_interval_motors()
       {
         frames_count[FPS_MOTOR]++;
         time_interval_count[FPS_MOTOR] = millis();
+        if(frames_count[FPS_MOTOR]>=interval_frames[FPS_MOTOR]) isAction=false;
         if (shutterSyncWithInterval)
           {
             float value_position=0;
