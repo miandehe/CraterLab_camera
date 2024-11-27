@@ -113,16 +113,17 @@ const char *htmlTemplate = R"rawliteral(
         <div class="section">
             <!-- Sección Motor Cámara -->
             <h3>Motor Cámara</h3>
-            <label for='fps'>FPS:</label>
-            <input type='number' id='fps'>
+            
             <h4>Speed</h4>
-            <p><span id='speedValueDisplay'>25</span> fps</p>
-            <input type='range' min='0' max='50' value='25' id='speedSlider'>
+            <label for='fps'>FPS:</label>
+            <input type='range' min='0' max='48' value='24' id='speedSlider'>
+            <span id='speedValueDisplay'>24</span> fps
+            <input type='number' id='fps'>
             <input type='checkbox' id='speedCheckbox'> Activar Speed
 
             <h4>Intervalómetro:</h4>
             <label for='intervalFrames'>Frames:</label>
-            <input type='number' id='intervalFrames' value='1' min='1'>
+            <input type='number' id='intervalFrames' value='10' min='1'>
             <label for='intervalSeconds'>Segundos:</label>
             <input type='number' id='intervalSeconds' value='1' min='1'>
             <input type='checkbox' id='intervalCheckbox'> Activar Intervalómetro
@@ -143,6 +144,7 @@ const char *htmlTemplate = R"rawliteral(
             <h4>Fade In/Out Frames:</h4>
             <p>% apertura inicial: <span id='fadePercentDisplay'>50</span></p>
             <input type='range' min='0' max='100' value='50' id='fadePercentSlider'>
+            <input type='number' id='fade'>
             <p>Número de frames: <span id='fadeFramesDisplay'>50</span></p>
             <input type='range' min='0' max='100' value='50' id='fadeFramesSlider'>
 
@@ -204,6 +206,7 @@ const char *htmlTemplate = R"rawliteral(
             <input type='text' id='x0Degrees'>
             <label for='x0Duration'>Duración (s):</label>
             <input type='text' id='x0Duration'>
+            <input type='number' id='x0Read'>
             <br>
             <button onclick="moveMotor('test_360','x0')">Test</button>
             <button onclick="moveMotor('save_360','x0')">Save</button>
@@ -216,6 +219,7 @@ const char *htmlTemplate = R"rawliteral(
             <input type='text' id='x1Degrees'>
             <label for='x1Duration'>Duración (s):</label>
             <input type='text' id='x1Duration'>
+            <input type='number' id='x1Read'>
             <br>
             <button onclick="moveMotor('test_360','x1')">Test</button>
             <button onclick="moveMotor('save_360','x1')">Save</button>
@@ -228,6 +232,7 @@ const char *htmlTemplate = R"rawliteral(
             <input type='text' id='y0Degrees'>
             <label for='y0Duration'>Duración (s):</label>
             <input type='text' id='y0Duration'>
+            <input type='number' id='y0Read'>
             <br>
             <button onclick="moveMotor('test_360','y0')">Test</button>
             <button onclick="moveMotor('save_360','y0')">Save</button>
@@ -418,8 +423,48 @@ const char *htmlTemplate = R"rawliteral(
               .catch(error => console.error('Error al obtener motorSpeed:', error));
           }
 
+          function updatefadePosition() {
+            fetch('/fadePercent')
+              .then(response => response.json())
+              .then(data => {
+                document.getElementById('fade').value = data.FadePercentRead;
+              })
+              .catch(error => console.error('Error al obtener fadePercent:', error));
+          }
+
+          function updatex0Position() {
+            fetch('/x0Read')
+              .then(response => response.json())
+              .then(data => {
+                document.getElementById('x0Read').value = data.x0Read;
+              })
+              .catch(error => console.error('Error al obtener x0:', error));
+          }
+
+          function updatex1Position() {
+            fetch('/x1Read')
+              .then(response => response.json())
+              .then(data => {
+                document.getElementById('x1Read').value = data.x1Read;
+              })
+              .catch(error => console.error('Error al obtener x1:', error));
+          }
+
+          function updatey0Position() {
+            fetch('/y0Read')
+              .then(response => response.json())
+              .then(data => {
+                document.getElementById('y0Read').value = data.y0Read;
+              })
+              .catch(error => console.error('Error al obtener y0:', error));
+          }
+
           // Actualiza cada segundo
           setInterval(updateMotorSpeed, 1000);
+          setInterval(updatefadePosition, 1000);
+          setInterval(updatex0Position, 1000);
+          setInterval(updatex1Position, 1000);
+          setInterval(updatey0Position, 1000);
         </script>
 
       </body>

@@ -3,4 +3,5 @@
 #define STOP 0
 #define IN 1
 #define OUT 2
-#define IN_OUT 2
+#define IN_OUT 3
+#define FPS_MOTOR 4

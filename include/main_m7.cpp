@@ -1,11 +1,12 @@
 //#include <SPI.h>
+#include <Arduino.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include "interface.html"
 #include "constants.h"
 #include <RPC.h>
-#include "RPC.h"
 
+#define DEBUG_M7 false
 #define AP_MODE false
 
 // Inicializando RTOS
@@ -56,24 +57,120 @@ int y0Degrees = 0;
 int y0Duration = 0;
 bool syncWithInterval360 = false;
 
-int motorSpeedRead = 0;
+//Sensores
+float motorSpeedRead = 0;
+float FadePercentRead = 0;
+int zoomValueRead = 0;
+int focusValueRead = 0;
+float diaphragmValueRead = 0;
+int x0DegreesRead = 0;
+int x1DegreesRead = 0;
+int y0DegreesRead = 0;
 
-void requestReading() {
-  while (true) {
-    delay(25);
-    motorSpeedRead = RPC.call("fpsRead").as<int>();
+int read_value[10];
+int* decode_values(String inputString, int num_dec)
+  {
+    String str = inputString.substring(inputString.lastIndexOf(":") + 1);
+    read_value[0] = str.substring(0, str.indexOf(',')).toInt();
+    for(int i=1; i<num_dec; i++)
+      {
+        str = str.substring(str.indexOf(',')+1);
+        read_value[i] = str.substring(0, str.indexOf(',')).toInt();
+      }
+    return read_value;
   }
-}
 
+char c_rpc;
+String inputString_rpc;
+
+void RPCRead()
+  {
+     ////////////////////////////////////////////////////////////
+     /////// RUTINA TRATAMIENTO DE STRINGS DEL UART   ///////////
+     ////////////////////////////////////////////////////////////
+     if (RPC.available())
+       {
+         c_rpc = RPC.read();
+         if ((c_rpc == '\r') || (c_rpc == '\n'))
+         {
+          if (inputString_rpc.startsWith("/sensors:")) //Speed Motor
+           {
+              int* value = decode_values(inputString_rpc, 5);
+              #if DEBUG_M4
+                RPC.print("Recibido Speed M4: ");
+                RPC.println(inputString_rpc);
+                for(int i=0; i<5; i++) RPC.println(value[i]);
+              #endif
+              motorSpeedRead = value[0];
+              FadePercentRead = value[1];
+              zoomValueRead = value[2];
+              focusValueRead = value[3];
+              diaphragmValueRead = value[4];
+            }
+           else if(inputString_rpc.startsWith("/fade:"))
+            {
+              int* value = decode_values(inputString_rpc, 5);
+              #if DEBUG_M4
+                RPC.print("Recibido Speed M4: ");
+                RPC.println(inputString_rpc);
+                for(int i=0; i<5; i++) RPC.println(value[i]);
+              #endif
+            }
+           inputString_rpc = String();
+         }
+         else
+           inputString_rpc += c_rpc;
+       }
+  }
+
+char c_serial;
+String inputString_serial;
+
+void SerialRead()
+  {
+     ////////////////////////////////////////////////////////////
+     /////// RUTINA TRATAMIENTO DE STRINGS DEL UART   ///////////
+     ////////////////////////////////////////////////////////////
+     if (command.available())
+       {
+         c_serial = command.read();
+         if ((c_serial == '\r') || (c_serial == '\n'))
+         {
+          if (inputString_serial.startsWith("/sensors:")) //Speed Motor
+           {
+              int* value = decode_values(inputString_serial, 3);
+              #if DEBUG_M4
+                RPC.print("Recibido Speed M4: ");
+                RPC.println(inputString_serial);
+                for(int i=0; i<5; i++) RPC.println(value[i]);
+              #endif
+              x0DegreesRead = value[0];
+              x1DegreesRead = value[1];
+              y0DegreesRead = value[2];
+            }
+           inputString_serial = String();
+         }
+         else
+           inputString_serial += c_serial;
+       }
+  }
+
+unsigned long time_refresh_sensors = millis();
+
+void refresh_sensors()
+  {
+    if((millis()-time_refresh_sensors)>=500)
+      {
+        time_refresh_sensors = millis();
+        RPC.println("/sensors:1");
+        command.println("/sensors:1");
+      }
+  }
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(1000000);
   command.begin(9600);
-  pinMode(LED_BUILTIN, OUTPUT);
-  delay(5000);
-  if (!RPC.begin()) {
-    Serial.println("RPC initialization fail");
-  }
+  RPC.begin(); //boots M4
 
   #if AP_MODE
     int status = WL_IDLE_STATUS;
@@ -87,6 +184,7 @@ void setup()
         ;
     }
   #else
+    WiFi.config(ip, dns, gateway, subnet); 
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -101,7 +199,6 @@ void setup()
   Serial.println(WiFi.localIP());
 
   server.begin();
-  //sensorThread.start(requestReading);
 }
 
 bool flag_send[10] = {false ,false ,false ,false ,false ,false ,false ,false ,false ,false};
@@ -114,7 +211,6 @@ void handlePostRequest(String body) {
   //DeserializationError error = deserializeJson(doc, body);
   /*if (error) {
     Serial.println("Error al parsear el JSON");
-    digitalWrite(LED_BUILTIN, LOW);
     return;
   }*/
 
@@ -142,11 +238,11 @@ void handlePostRequest(String body) {
       else if (Direction=="backward") motorDirection = BACKWARD;
       if(motorIsSpeedActive)
         {
-          RPC.println("/s_motor:4," + String(motorDirection) + "," + String(motorSpeedValue) + "," + String(save));
+          RPC.println("/s_motor:" + String(FPS_MOTOR) + "," + String(motorDirection) + "," + String(motorSpeedValue) + "," + String(save));
         }
       else if(motorIsIntervalActive)
         {
-          RPC.println("/i_motor:4," + String(motorDirection) + "," + String(motorIntervalFrames) + "," + String(motorIntervalSeconds) + "," + String(save));
+          RPC.println("/i_motor:" + String(FPS_MOTOR) + ","  + String(motorDirection) + "," + String(motorIntervalFrames) + "," + String(motorIntervalSeconds) + "," + String(save));
         }   
       /*Clave: type, Valor: motor
       Clave: speedValue, Valor: )25
@@ -226,7 +322,6 @@ void handlePostRequest(String body) {
     }
   else if (type=="stop") RPC.println("/s_motor:4," + String(motorDirection) + "," + String(0) + ", 0");
   else Serial.println("No reconocido");
-  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 unsigned long time_blink=millis();
@@ -235,7 +330,9 @@ bool state = false;
 void loop() {
   WiFiClient client = server.available();
   if (client) {
-    Serial.println("Nuevo cliente conectado");
+    #if DEBUG_M7
+      Serial.println("Nuevo cliente conectado");
+    #endif
     String request = "";
     bool isPostRequest = false;
 
@@ -251,18 +348,20 @@ void loop() {
 
         // Si se encuentra el final de la solicitud
         if (c == '\n' && request.endsWith("\r\n\r\n")) {
-          Serial.println("Solicitud recibida:");
-          Serial.println(request);
+          #if DEBUG_M7
+            Serial.println("Solicitud recibida:");
+            Serial.println(request);
+          #endif
 
           if (isPostRequest) {
             String body = "";
             while (client.available()) {
               body += (char)client.read();
             }
-
-            Serial.println("Cuerpo del mensaje recibido:");
-            Serial.println(body);
-
+            #if DEBUG_M7
+              Serial.println("Cuerpo del mensaje recibido:");
+              Serial.println(body);
+            #endif
             // Llamamos a la función para procesar la petición POST
             handlePostRequest(body);
 
@@ -278,6 +377,34 @@ void loop() {
             client.println();
             String response = "{\"motorSpeedRead\": " + String(motorSpeedRead) + "}";
             client.print(response); 
+          } else if (request.indexOf("GET /fadePercent") >= 0) { // actualiza fps en interface
+            // Respuesta para la ruta /motorSpeed
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-Type: application/json");
+            client.println();
+            String response = "{\"FadePercentRead\": " + String(FadePercentRead) + "}";
+            client.print(response); 
+          } else if (request.indexOf("GET /x0Read") >= 0) { // actualiza fps en interface
+            // Respuesta para la ruta /motorSpeed
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-Type: application/json");
+            client.println();
+            String response = "{\"x0Read\": " + String(x0DegreesRead) + "}";
+            client.print(response); 
+          } else if (request.indexOf("GET /x1Read") >= 0) { // actualiza fps en interface
+            // Respuesta para la ruta /motorSpeed
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-Type: application/json");
+            client.println();
+            String response = "{\"x1Read\": " + String(x1DegreesRead) + "}";
+            client.print(response); 
+          } else if (request.indexOf("GET /y0Read") >= 0) { // actualiza fps en interface
+            // Respuesta para la ruta /motorSpeed
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-Type: application/json");
+            client.println();
+            String response = "{\"y0Read\": " + String(y0DegreesRead) + "}";
+            client.print(response); 
           } else {
             // Respuesta para servir la interfaz HTML
             client.println("HTTP/1.1 200 OK");
@@ -290,16 +417,22 @@ void loop() {
       }
     }
     client.stop();
-    Serial.println("Cliente desconectado");
+    #if DEBUG_M7
+      Serial.println("Cliente desconectado");
+    #endif
   }
 
+  RPCRead();
+  SerialRead();
+  refresh_sensors();
+
   // Leer datos del RPC
-  String buffer = "";
+  /*String buffer = "";
   while (RPC.available()) {
     buffer += (char)RPC.read();
   }
 
   if (buffer.length() > 0) {
     Serial.print(buffer);
-  }
+  }*/
 }
