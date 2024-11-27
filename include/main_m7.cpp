@@ -107,14 +107,15 @@ void RPCRead()
               focusValueRead = value[3];
               diaphragmValueRead = value[4];
             }
-           else if(inputString_rpc.startsWith("/fade:"))
+           else if(inputString_rpc.startsWith("/debug:"))
             {
-              int* value = decode_values(inputString_rpc, 5);
-              #if DEBUG_M4
-                RPC.print("Recibido Speed M4: ");
-                RPC.println(inputString_rpc);
-                for(int i=0; i<5; i++) RPC.println(value[i]);
-              #endif
+              //int* value = decode_values(inputString_rpc, 5);
+              //#if DEBUG_M7
+                Serial.print("Recibido debug M4: ");
+                Serial.println(inputString_rpc);
+                //for(int i=0; i<5; i++) Serial.println(value[i]);
+              //#endif
+
             }
            inputString_rpc = String();
          }

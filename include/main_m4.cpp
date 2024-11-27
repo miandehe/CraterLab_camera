@@ -8,10 +8,6 @@
 #define DEBUG_M4 false
 #define MIN_SPEED 55
 
-// Inicializando RTOS
-using namespace rtos;
-Thread sensorThread;
-
 // Motor
 int motorSpeedValue = 24;
 bool motorIsSpeedActive = false;
@@ -128,7 +124,7 @@ void stop(int motor)
       }
   }
 
-unsigned long time_move_for_move_position_motor[6] = {0, 0, 0, 0, 0, 0};
+float time_move_for_move_position_motor[6] = {0, 0, 0, 0, 0, 0};
 unsigned long time_refresh_position_motor[6] = { millis(), millis(), millis(), millis(), millis(), millis()};
 float position_motor[6] = { 0, 0, 0, 0, 0, 0};
 float position_motor_objective[6] = { 0, 0, 0, 0, 0, 0};
@@ -138,12 +134,13 @@ void config_position_motor(int motor, float position) //Configuracion posicion e
   {
     if((position!=position_motor[motor])&&(!moving_position_motor[motor]))
       {
-        time_move_for_move_position_motor[motor] = abs(position_motor[motor]-position)*TIME_LINEAL_MAX[motor]/100;
-        time_refresh_position_motor[motor] = millis();
+        time_move_for_move_position_motor[motor] = (abs(position_motor[motor]-position)*TIME_LINEAL_MAX[motor])/100.;
         if(position>position_motor[motor]) forward(motor,255);
         else backward(motor,255);
-         position_motor_objective[motor]=position;
+        time_refresh_position_motor[motor] = millis();
+        position_motor_objective[motor] = position;
         moving_position_motor[motor] = true;
+        //RPC.println("/debug:" + String(position_motor[motor]) + "," + String(position) + "," + String(millis()-time_refresh_position_motor[motor]) + "," + String(time_move_for_move_position_motor[motor]) + "," + "INI");
         //Serial.println(time_move_for_move_position_motor[motor]);
       }
   }
@@ -268,11 +265,12 @@ void refresh_position_motors()
   {
     for(int i=0; i<4; i++)
       {
-        if(((millis()-time_refresh_position_motor[i])>time_move_for_move_position_motor[i])&&(moving_position_motor[i]))
+        if(((millis()-time_refresh_position_motor[i])>(unsigned long)time_move_for_move_position_motor[i])&&(moving_position_motor[i]))
           {
             stop(i);
             position_motor[i] = position_motor_objective[i];
             moving_position_motor[i] = false;
+            //RPC.println("/debug:" + String(position_motor[i]) + "," + String(position_motor_objective[i]) + "," + String(millis()-time_refresh_position_motor[i]) + "," + String(time_move_for_move_position_motor[i]) + "," + "END");
           }
       }
   }
@@ -473,75 +471,6 @@ void RPCRead()
        }
   }
 
-void requestReading() {
-  while (true) {
-    //delay(100);
-    RPCRead();
-  }
-}
-
-char c;
-String inputString;
-void SerialRead()
-  {
-     ////////////////////////////////////////////////////////////
-     /////// RUTINA TRATAMIENTO DE STRINGS DEL UART   ///////////
-     ////////////////////////////////////////////////////////////
-     if (command.available())
-       {
-         c = command.read();
-         if ((c == '\r') || (c == '\n'))
-         {
-          if (inputString.startsWith("/s_motor:")) //Speed Motor
-           {
-             //Serial.print("Rec: ");
-             //Serial.println(inputString);
-             String str = inputString.substring(inputString.lastIndexOf(":") + 1);
-             //Serial.println(str);
-             int value[3];
-             value[0] = str.substring(0, str.indexOf(',')).toInt();
-             //Serial.println(value[0]);
-             for(int i=1; i<3; i++)
-                  {
-                    str = str.substring(str.indexOf(',')+1);
-                    value[i] = str.substring(0, str.indexOf(',')).toInt();
-                    //Serial.println(value[i]);
-                  }
-             if (value[0]==FPS_MOTOR)
-              {
-                int value_temp = 0;
-                if(value[2]==24) value_temp = 146;
-                else if(value[2]==48) value_temp = 192;
-                else value_temp = 0;
-                //config_smotor(value[0], value[1], value_temp);
-                if (value_temp==0) secure_stop(value[1]);
-                else config_speed_motor(value[0], value[1], value_temp);
-              }
-            else config_speed_motor(value[0], value[1], value[2]);
-             
-              
-             //config_angle(value[0], value[1], value[2]);
-            }
-         else if (inputString.startsWith("/p_motor:")) //Position motor
-           {
-             //Serial.print("Motor: ");
-             String str = inputString.substring(inputString.lastIndexOf(":") + 1);
-             //Serial.println(str);
-             int value[3];
-             value[0] = str.substring(0, str.indexOf(',')).toInt();
-             str = str.substring(str.indexOf(',')+1);
-             value[1] = str.substring(0, str.indexOf(',')).toInt();
-             //Serial.println(value[0]);
-             //Serial.println(value[1]);
-             config_position_motor(value[0], value[1]);
-            }
-           inputString = String();
-         }
-         else
-           inputString += c;
-       }
-  }
-
 void setup() {
   //SCB_CleanDCache();
   RPC.begin();
@@ -587,7 +516,7 @@ void setup() {
   /*
   Starts a new thread that loops the requestReading() function
   */
-  sensorThread.start(requestReading);
+  //sensorThread.start(requestReading);
   #if DEBUG_M4
     RPC.println("M4 Inicializado.");
   #endif
@@ -603,6 +532,7 @@ void loop()
   #endif
  refresh_position_motors();
  refresh_interval_motors();
+ RPCRead();
  if(force_stop)
   {
     //config_speed_motor(FPS_MOTOR, !motorDirection, MIN_SPEED);
