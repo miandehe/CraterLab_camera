@@ -467,17 +467,12 @@ const char *htmlTemplate = R"rawliteral(
 
     function updateSensors() {
       fetch('/sensors')
-        .then(response => response.text())
+        .then(response => response.json()) // Parsear la respuesta como JSON
         .then(data => {
-          
-          if (data.startsWith("/sensors:[")) {
-            
-            const sensorValues = data
-              .slice(data.indexOf("[") + 1, data.indexOf("]")) 
-              .split(",") 
-              .map(value => parseFloat(value)); 
+          if (data.sensors && Array.isArray(data.sensors)) {
+            const sensorValues = data.sensors;
 
-            
+            // Asignar los valores a los elementos de la interfaz
             if (sensorValues.length >= 1) {
               document.getElementById('fps').value = sensorValues[0];
             }
@@ -494,14 +489,14 @@ const char *htmlTemplate = R"rawliteral(
               document.getElementById('y0Read').value = sensorValues[4];
             }
           } else {
-            console.error('Formato inesperado:', data);
+            console.error('Estructura inesperada:', data);
           }
         })
         .catch(error => console.error('Error al obtener sensores:', error));
     }
 
-    // Llama a updateSensors cada 100ms
-    setInterval(updateSensors, 100);
+    // Llama a updateSensors cada 500ms
+    setInterval(updateSensors, 500);
 
     // Actualiza cada segundo
     //setInterval(updateMotorSpeed, 100);
