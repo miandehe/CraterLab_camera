@@ -365,7 +365,6 @@ void loop() {
             #endif
             // Llamamos a la función para procesar la petición POST
             handlePostRequest(body);
-
             // Respuesta al cliente
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/plain");
@@ -376,42 +375,8 @@ void loop() {
             client.println("HTTP/1.1 200 OK");
             client.println("Content-Type: application/json");
             client.println();
-            String response = "{\"sensors\":[" + String(motorSpeedRead) + "," + String(FadePercentRead) + "," + String(x0DegreesRead) + "," + String(x1DegreesRead) + "," + String(y0DegreesRead) + "]}";
-            client.print(response); 
-          } else if (request.indexOf("GET /motorSpeed") >= 0) { // actualiza fps en interface
-            // Respuesta para la ruta /motorSpeed
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: application/json");
-            client.println();
-            String response = "{\"motorSpeedRead\": " + String(motorSpeedRead) + "}";
-            client.print(response); 
-          } else if (request.indexOf("GET /fadePercent") >= 0) { // actualiza fps en interface
-            // Respuesta para la ruta /motorSpeed
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: application/json");
-            client.println();
-            String response = "{\"FadePercentRead\": " + String(FadePercentRead) + "}";
-            client.print(response); 
-          } else if (request.indexOf("GET /x0Read") >= 0) { // actualiza fps en interface
-            // Respuesta para la ruta /motorSpeed
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: application/json");
-            client.println();
-            String response = "{\"x0Read\": " + String(x0DegreesRead) + "}";
-            client.print(response); 
-          } else if (request.indexOf("GET /x1Read") >= 0) { // actualiza fps en interface
-            // Respuesta para la ruta /motorSpeed
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: application/json");
-            client.println();
-            String response = "{\"x1Read\": " + String(x1DegreesRead) + "}";
-            client.print(response); 
-          } else if (request.indexOf("GET /y0Read") >= 0) { // actualiza fps en interface
-            // Respuesta para la ruta /motorSpeed
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: application/json");
-            client.println();
-            String response = "{\"y0Read\": " + String(y0DegreesRead) + "}";
+            String response = "{\"sensors\":[" + String(motorSpeedRead) + "," + String(FadePercentRead) + "," 
+                                  + String(x0DegreesRead) + "," + String(x1DegreesRead) + "," + String(y0DegreesRead) + "]}";
             client.print(response); 
           } else {
             // Respuesta para servir la interfaz HTML
