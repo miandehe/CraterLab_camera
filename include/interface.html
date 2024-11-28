@@ -1,473 +1,514 @@
 // Plantilla HTML
 const char *htmlTemplate = R"rawliteral(
-      <html>
+<html>
 
-      <head>
-        <meta charset='UTF-8'>
-        <style>
-            /* Tema oscuro básico */
-            body {
-                background-color: #121212;
-                color: #ffffff;
-                font-family: Arial, sans-serif;
-                margin: 20px;
-            }
+<head>
+  <meta charset='UTF-8'>
+  <style>
+    /* Tema oscuro básico */
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
 
-            h2 {
-                color: #cccccc; /* Gris claro */
-                font-size: 32px;
-                border-bottom: 2px solid #555555; /* Un borde gris medio */
-                padding-bottom: 5px;
-                margin-bottom: 20px;
-            }
+    h2 {
+      color: #cccccc;
+      /* Gris claro */
+      font-size: 32px;
+      border-bottom: 2px solid #555555;
+      /* Un borde gris medio */
+      padding-bottom: 5px;
+      margin-bottom: 20px;
+    }
 
-            h3 {
-                color: #bbbbbb; /* Gris medio-claro */
-                font-size: 20px;
-                margin-top: 30px;
-                padding-bottom: 5px;
-                border-bottom: 1px solid #444444; /* Un borde gris oscuro */
-            }
+    h3 {
+      color: #bbbbbb;
+      /* Gris medio-claro */
+      font-size: 20px;
+      margin-top: 30px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #444444;
+      /* Un borde gris oscuro */
+    }
 
-            h4 {
-                color: #dddddd; /* Blanco roto o gris muy claro */
-                font-size: 18px;
-                margin-top: 20px;
-            }
+    h4 {
+      color: #dddddd;
+      /* Blanco roto o gris muy claro */
+      font-size: 18px;
+      margin-top: 20px;
+    }
 
-            /* Estilos de los inputs */
-            input[type="text"],
-            input[type="number"],
-            select {
-                width: 100px;
-                padding: 5px;
-                margin: 5px 0;
-                background-color: #333;
-                border: 1px solid #555;
-                color: #fff;
-                border-radius: 5px;
-            }
+    /* Estilos de los inputs */
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100px;
+      padding: 5px;
+      margin: 5px 0;
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+      border-radius: 5px;
+    }
 
-            /* Estilos del checkbox y radio */
-            input[type="checkbox"],
-            input[type="radio"] {
-                margin: 10px;
-            }
+    /* Estilos del checkbox y radio */
+    input[type="checkbox"],
+    input[type="radio"] {
+      margin: 10px;
+    }
 
-            /* Estilo de los sliders */
-            input[type="range"] {
-                width: 30%;
-                margin: 10px 0;
-            }
+    /* Estilo de los sliders */
+    input[type="range"] {
+      width: 30%;
+      margin: 10px 0;
+    }
 
-            /* Botones */
-            button {
-                background-color: #1e88e5;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-                margin: 10px 2px;
-                cursor: pointer;
-                border-radius: 5px;
-                transition: background-color 0.3s ease;
-            }
+    /* Botones */
+    button {
+      background-color: #1e88e5;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px 2px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
 
-            button:hover {
-                background-color: #1565c0;
-            }
+    button:hover {
+      background-color: #1565c0;
+    }
 
 
-            /* Dark styling for select dropdown */
-            select {
-                background-color: #333;
-                color: white;
-                border: 1px solid #555;
-                padding: 5px;
-            }
+    /* Dark styling for select dropdown */
+    select {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      padding: 5px;
+    }
 
-            /* Estilo para contenedores de secciones */
-            .section {
-                background-color: #1e1e1e;
-                padding: 20px;
-                padding-top: 0px;
-                border-radius: 10px;
-                margin-bottom: 20px;
-                border: 1px solid #333; /* Bordes más visibles */
-            }
+    /* Estilo para contenedores de secciones */
+    .section {
+      background-color: #1e1e1e;
+      padding: 20px;
+      padding-top: 0px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #333;
+      /* Bordes más visibles */
+    }
 
-            /* Estilo para centrar los formularios en la pantalla */
-            .form-container {
-                max-width: 600px;
-                margin: 0 auto;
-            }
-        </style>
-      </head>
+    /* Estilo para centrar los formularios en la pantalla */
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
 
-      <body>
-        <div class="form-container">
-        <h2>Control Bolex Paillard</h2>
-        <div class="section">
-            <!-- Sección Motor Cámara -->
-            <h3>Motor Cámara</h3>
-            
-            <h4>Speed</h4>
-            <label for='fps'>FPS:</label>
-            <input type='range' min='0' max='48' value='24' id='speedSlider'>
-            <span id='speedValueDisplay'>24</span> fps
-            <input type='number' id='fps'>
-            <input type='checkbox' id='speedCheckbox'> Activar Speed
+<body>
+  <div class="form-container">
+    <h2>Control Bolex Paillard</h2>
+    <div class="section">
+      <!-- Sección Motor Cámara -->
+      <h3>Motor Cámara</h3>
 
-            <h4>Intervalómetro:</h4>
-            <label for='intervalFrames'>Frames:</label>
-            <input type='number' id='intervalFrames' value='10' min='1'>
-            <label for='intervalSeconds'>Segundos:</label>
-            <input type='number' id='intervalSeconds' value='1' min='1'>
-            <input type='checkbox' id='intervalCheckbox'> Activar Intervalómetro
+      <h4>Speed</h4>
+      <label for='fps'>FPS:</label>
+      <input type='range' min='0' max='48' value='24' id='speedSlider'>
+      <span id='speedValueDisplay'>24</span> fps
+      <input type='number' id='fps'>
+      <input type='checkbox' id='speedCheckbox'> Activar Speed
 
-            <h4>Dirección:</h4>
-            <input type='radio' id='forward' name='direction' value='forward' checked> Forward
-            <input type='radio' id='backward' name='direction' value='backward'> Backward
-            <br><br>
-            <button onclick="sendMotorCameraData('test_motor')">Test</button>
-            <button onclick="sendMotorCameraData('save_motor')">Save</button>
-            <button onclick="stop()">Stop</button>
-            <span id="motorCameraMessage" style="color: green; display: none;">Datos enviados correctamente</span>
-        </div>
+      <h4>Intervalómetro:</h4>
+      <label for='intervalFrames'>Frames:</label>
+      <input type='number' id='intervalFrames' value='10' min='1'>
+      <label for='intervalSeconds'>Segundos:</label>
+      <input type='number' id='intervalSeconds' value='1' min='1'>
+      <input type='checkbox' id='intervalCheckbox'> Activar Intervalómetro
 
-        <div class="section">
-            <!-- Sección Shutter -->
-            <h3>Shutter</h3>
-            <h4>Fade In/Out Frames:</h4>
-            <p>% apertura inicial: <span id='fadePercentDisplay'>50</span></p>
-            <input type='range' min='0' max='100' value='50' id='fadePercentSlider'>
-            <input type='number' id='fade'>
-            <p>Número de frames: <span id='fadeFramesDisplay'>50</span></p>
-            <input type='range' min='0' max='100' value='50' id='fadeFramesSlider'>
+      <h4>Dirección:</h4>
+      <input type='radio' id='forward' name='direction' value='forward' checked> Forward
+      <input type='radio' id='backward' name='direction' value='backward'> Backward
+      <br><br>
+      <button onclick="sendMotorCameraData('test_motor')">Test</button>
+      <button onclick="sendMotorCameraData('save_motor')">Save</button>
+      <button onclick="stop()">Stop</button>
+      <span id="motorCameraMessage" style="color: green; display: none;">Datos enviados correctamente</span>
+    </div>
 
-            <h4>Fade Activación:</h4>
-            <input type='checkbox' id='fadeInCheckbox'> Activar Fade In
-            <input type='checkbox' id='fadeOutCheckbox'> Activar Fade Out
-            <br><br>
-            <input type='checkbox' id='syncWithIntervalCheckbox'> Sincronizar con Intervalómetro
+    <div class="section">
+      <!-- Sección Shutter -->
+      <h3>Shutter</h3>
+      <h4>Fade In/Out Frames:</h4>
+      <p>% apertura inicial: <span id='fadePercentDisplay'>50</span></p>
+      <input type='range' min='0' max='100' value='50' id='fadePercentSlider'>
+      <input type='number' id='fade'>
+      <p>Número de frames: <span id='fadeFramesDisplay'>50</span></p>
+      <input type='range' min='0' max='100' value='50' id='fadeFramesSlider'>
 
-            <br><br>
-            <button onclick="sendShutterData('save_shutter')">Save</button>
-            <span id="shutterMessage" style="color: green; display: none;">Datos enviados correctamente</span>
-        </div>
+      <h4>Fade Activación:</h4>
+      <input type='checkbox' id='fadeInCheckbox'> Activar Fade In
+      <input type='checkbox' id='fadeOutCheckbox'> Activar Fade Out
+      <br><br>
+      <input type='checkbox' id='syncWithIntervalCheckbox'> Sincronizar con Intervalómetro
 
-        <div class="section">
-            <!-- Sección Monitor de Cámara -->
-            <h3>Monitor de Cámara</h3>
-            <iframe src="http://192.168.8.5:8000" width="100%" height="400px" style="border: none;"></iframe>
-        </div>
+      <br><br>
+      <button onclick="sendShutterData('save_shutter')">Save</button>
+      <span id="shutterMessage" style="color: green; display: none;">Datos enviados correctamente</span>
+    </div>
 
-        <div class="section">
-            <!-- Sección Óptica -->
-            <h3>Óptica</h3>
-            <h4>Zoom:</h4>
-            <p>Valor de zoom: <span id='zoomValueDisplay'>50</span></p>
-            <input type='range' min='0' max='100' value='50' id='zoomSlider'>
+    <div class="section">
+      <!-- Sección Monitor de Cámara -->
+      <h3>Monitor de Cámara</h3>
+      <iframe src="http://192.168.8.5:8000" width="100%" height="400px" style="border: none;"></iframe>
+    </div>
 
-            <h4>Foco:</h4>
-            <p>Valor de foco: <span id='focusValueDisplay'>50</span></p>
-            <input type='range' min='0' max='100' value='50' id='focusSlider'>
+    <div class="section">
+      <!-- Sección Óptica -->
+      <h3>Óptica</h3>
+      <h4>Zoom:</h4>
+      <p>Valor de zoom: <span id='zoomValueDisplay'>50</span></p>
+      <input type='range' min='0' max='100' value='50' id='zoomSlider'>
 
-            <h4>Diafragma:</h4>
-            <select id='diaphragmSelect'>
-            <option value='1.9'>1.9</option>
-            <option value='2.2'>2.2</option>
-            <option value='4'>4</option>
-            <option value='5.6'>5.6</option>
-            <option value='8'>8</option>
-            <option value='11'>11</option>
-            <option value='16'>16</option>
-            <option value='22'>22</option>
-            </select>
-            <br><br>
-            <input type='checkbox' id='syncWithIntervalOptics'> Sincronizar con Intervalómetro
-            <br><br>
-            <button onclick="sendOpticsData('test_optics')">Test</button>
-            <button onclick="sendOpticsData('save_optics')">Save</button>
-            <span id="opticsMessage" style="color: green; display: none;">Datos enviados correctamente</span>
-        </div>
+      <h4>Foco:</h4>
+      <p>Valor de foco: <span id='focusValueDisplay'>50</span></p>
+      <input type='range' min='0' max='100' value='50' id='focusSlider'>
 
-        <div class="section">
-            <!-- Sección Dispositivo 360 -->
-            <h3>Dispositivo 360</h3>
-            
+      <h4>Diafragma:</h4>
+      <select id='diaphragmSelect'>
+        <option value='1.9'>1.9</option>
+        <option value='2.2'>2.2</option>
+        <option value='4'>4</option>
+        <option value='5.6'>5.6</option>
+        <option value='8'>8</option>
+        <option value='11'>11</option>
+        <option value='16'>16</option>
+        <option value='22'>22</option>
+      </select>
+      <br><br>
+      <input type='checkbox' id='syncWithIntervalOptics'> Sincronizar con Intervalómetro
+      <br><br>
+      <button onclick="sendOpticsData('test_optics')">Test</button>
+      <button onclick="sendOpticsData('save_optics')">Save</button>
+      <span id="opticsMessage" style="color: green; display: none;">Datos enviados correctamente</span>
+    </div>
 
-            <!-- Subsección X0 -->
-            <h4>X0:</h4>
-            <label for='x0Degrees'>Grados:</label>
-            <input type='text' id='x0Degrees'>
-            <label for='x0Duration'>Duración (s):</label>
-            <input type='text' id='x0Duration'>
-            <input type='number' id='x0Read'>
-            <br>
-            <button onclick="moveMotor('test_360','x0')">Test</button>
-            <button onclick="moveMotor('save_360','x0')">Save</button>
-            <span id="x0Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
-            <br><br>
+    <div class="section">
+      <!-- Sección Dispositivo 360 -->
+      <h3>Dispositivo 360</h3>
 
-            <!-- Subsección X1 -->
-            <h4>X1:</h4>
-            <label for='x1Degrees'>Grados:</label>
-            <input type='text' id='x1Degrees'>
-            <label for='x1Duration'>Duración (s):</label>
-            <input type='text' id='x1Duration'>
-            <input type='number' id='x1Read'>
-            <br>
-            <button onclick="moveMotor('test_360','x1')">Test</button>
-            <button onclick="moveMotor('save_360','x1')">Save</button>
-            <span id="x1Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
-            <br><br>
 
-            <!-- Subsección Y0 -->
-            <h4>Y0:</h4>
-            <label for='y0Degrees'>Grados:</label>
-            <input type='text' id='y0Degrees'>
-            <label for='y0Duration'>Duración (s):</label>
-            <input type='text' id='y0Duration'>
-            <input type='number' id='y0Read'>
-            <br>
-            <button onclick="moveMotor('test_360','y0')">Test</button>
-            <button onclick="moveMotor('save_360','y0')">Save</button>
-            <span id="y0Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
-            <br><br>
-            <input type='checkbox' id='syncWithInterval360'> Sincronizar con Intervalómetro
-            <br><br>
-        </div>
+      <!-- Subsección X0 -->
+      <h4>X0:</h4>
+      <label for='x0Degrees'>Grados:</label>
+      <input type='text' id='x0Degrees'>
+      <label for='x0Duration'>Duración (s):</label>
+      <input type='text' id='x0Duration'>
+      <input type='number' id='x0Read'>
+      <br>
+      <button onclick="moveMotor('test_360','x0')">Test</button>
+      <button onclick="moveMotor('save_360','x0')">Save</button>
+      <span id="x0Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
+      <br><br>
 
-        <div class="section">
-            <!-- Sección Rodaje -->
-            <h3>Rodaje</h3>
-            <button onclick="accion()">ACCIÓN !!!</button>
-            <button onclick="corten()">CORTEN !!!</button>
-            <span id="accionMessage" style="color: green; display: none;">Mensaje enviado correctamente</span>
-            <br><br>
-        </div>
-        </div>
-        <!-- Script para manejar las interacciones y enviar el JSON -->
-        <script>
-          function updateDisplay() {
-            document.getElementById('speedValueDisplay').innerText = document.getElementById('speedSlider').value;
-            document.getElementById('fadePercentDisplay').innerText = document.getElementById('fadePercentSlider').value;
-            document.getElementById('fadeFramesDisplay').innerText = document.getElementById('fadeFramesSlider').value;
-            document.getElementById('zoomValueDisplay').innerText = document.getElementById('zoomSlider').value;
-            document.getElementById('focusValueDisplay').innerText = document.getElementById('focusSlider').value;
-          }
+      <!-- Subsección X1 -->
+      <h4>X1:</h4>
+      <label for='x1Degrees'>Grados:</label>
+      <input type='text' id='x1Degrees'>
+      <label for='x1Duration'>Duración (s):</label>
+      <input type='text' id='x1Duration'>
+      <input type='number' id='x1Read'>
+      <br>
+      <button onclick="moveMotor('test_360','x1')">Test</button>
+      <button onclick="moveMotor('save_360','x1')">Save</button>
+      <span id="x1Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
+      <br><br>
 
-          function showMessage(elementId) {
-            const messageElement = document.getElementById(elementId);
-            if (messageElement) {
-              messageElement.style.display = 'inline';
-              setTimeout(() => {
-                messageElement.style.display = 'none';
-              }, 3000); // Mostrar el mensaje durante 3 segundos
-            }
-          }
+      <!-- Subsección Y0 -->
+      <h4>Y0:</h4>
+      <label for='y0Degrees'>Grados:</label>
+      <input type='text' id='y0Degrees'>
+      <label for='y0Duration'>Duración (s):</label>
+      <input type='text' id='y0Duration'>
+      <input type='number' id='y0Read'>
+      <br>
+      <button onclick="moveMotor('test_360','y0')">Test</button>
+      <button onclick="moveMotor('save_360','y0')">Save</button>
+      <span id="y0Message" style="color: green; display: none;">Movimiento enviado correctamente</span>
+      <br><br>
+      <input type='checkbox' id='syncWithInterval360'> Sincronizar con Intervalómetro
+      <br><br>
+    </div>
 
-          function sendMotorCameraData(type_mode) {
-            const motorData = {
-              type: type_mode,
-              /*speedValue: document.getElementById('speedSlider').value,
-              isSpeedActive: document.getElementById('speedCheckbox').checked,
-              intervalFrames: document.getElementById('intervalFrames').value,
-              intervalSeconds: document.getElementById('intervalSeconds').value,
-              isIntervalActive: document.getElementById('intervalCheckbox').checked,
-              direction: document.querySelector('input[name="direction"]:checked').value*/
-              0: document.getElementById('speedSlider').value,
-              1: document.getElementById('speedCheckbox').checked,
-              2: document.getElementById('intervalFrames').value,
-              3: document.getElementById('intervalSeconds').value,
-              4: document.getElementById('intervalCheckbox').checked,
-              5: document.querySelector('input[name="direction"]:checked').value
-            };
-            fetch('/updateMotorCamera', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(motorData),
-            })
-              .then(response => response.text())
-              .then(() => showMessage('motorCameraMessage'))
-              .catch(error => console.error('Motor Camera Error:', error));
-          }
+    <div class="section">
+      <!-- Sección Rodaje -->
+      <h3>Rodaje</h3>
+      <button onclick="accion()">ACCIÓN !!!</button>
+      <button onclick="corten()">CORTEN !!!</button>
+      <span id="accionMessage" style="color: green; display: none;">Mensaje enviado correctamente</span>
+      <br><br>
+    </div>
+  </div>
+  <!-- Script para manejar las interacciones y enviar el JSON -->
+  <script>
+    function updateDisplay() {
+      document.getElementById('speedValueDisplay').innerText = document.getElementById('speedSlider').value;
+      document.getElementById('fadePercentDisplay').innerText = document.getElementById('fadePercentSlider').value;
+      document.getElementById('fadeFramesDisplay').innerText = document.getElementById('fadeFramesSlider').value;
+      document.getElementById('zoomValueDisplay').innerText = document.getElementById('zoomSlider').value;
+      document.getElementById('focusValueDisplay').innerText = document.getElementById('focusSlider').value;
+    }
 
-          function stop() {
+    function showMessage(elementId) {
+      const messageElement = document.getElementById(elementId);
+      if (messageElement) {
+        messageElement.style.display = 'inline';
+        setTimeout(() => {
+          messageElement.style.display = 'none';
+        }, 3000); // Mostrar el mensaje durante 3 segundos
+      }
+    }
 
-            const accionData = {
-              type: 'stop',
-            };
-            fetch('/stop', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(accionData),
-            })
-              .then(response => response.text())
-              .then(() => showMessage('motorCameraMessage'))
-              .catch(error => console.error('Stop Error:', error));
-          }
+    function sendMotorCameraData(type_mode) {
+      const motorData = {
+        type: type_mode,
+        /*speedValue: document.getElementById('speedSlider').value,
+        isSpeedActive: document.getElementById('speedCheckbox').checked,
+        intervalFrames: document.getElementById('intervalFrames').value,
+        intervalSeconds: document.getElementById('intervalSeconds').value,
+        isIntervalActive: document.getElementById('intervalCheckbox').checked,
+        direction: document.querySelector('input[name="direction"]:checked').value*/
+        0: document.getElementById('speedSlider').value,
+        1: document.getElementById('speedCheckbox').checked,
+        2: document.getElementById('intervalFrames').value,
+        3: document.getElementById('intervalSeconds').value,
+        4: document.getElementById('intervalCheckbox').checked,
+        5: document.querySelector('input[name="direction"]:checked').value
+      };
+      fetch('/updateMotorCamera', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(motorData),
+      })
+        .then(response => response.text())
+        .then(() => showMessage('motorCameraMessage'))
+        .catch(error => console.error('Motor Camera Error:', error));
+    }
 
-          function sendShutterData(type_mode) {
-            const shutterData = {
-              type: type_mode,
-              /*fadePercent: document.getElementById('fadePercentSlider').value, 
-              fadeFrames: document.getElementById('fadeFramesSlider').value,
-              syncWithInterval: document.getElementById('syncWithIntervalCheckbox').checked,
-              fadeInActive: document.getElementById('fadeInCheckbox').checked,
-              fadeOutActive: document.getElementById('fadeOutCheckbox').checked*/
-              0: document.getElementById('fadePercentSlider').value, 
-              1: document.getElementById('fadeFramesSlider').value,
-              2: document.getElementById('syncWithIntervalCheckbox').checked,
-              3: document.getElementById('fadeInCheckbox').checked,
-              4: document.getElementById('fadeOutCheckbox').checked
-            };
-            fetch('/updateShutter', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(shutterData),
-            })
-              .then(response => response.text())
-              .then(() => showMessage('shutterMessage'))
-              .catch(error => console.error('Shutter Error:', error));
-          }
+    function stop() {
 
-          function sendOpticsData(type_mode) {
-            const opticsData = {
-              type: type_mode,
-              zoomValue: document.getElementById('zoomSlider').value,
-              focusValue: document.getElementById('focusSlider').value,
-              diaphragmValue: document.getElementById('diaphragmSelect').value,
-              syncWithInterval: document.getElementById('syncWithIntervalOptics').checked
-            };
-            fetch('/updateOptics', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(opticsData),
-            })
-              .then(response => response.text())
-              .then(() => showMessage('opticsMessage'))
-              .catch(error => console.error('Optics Error:', error));
-          }
+      const accionData = {
+        type: 'stop',
+      };
+      fetch('/stop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(accionData),
+      })
+        .then(response => response.text())
+        .then(() => showMessage('motorCameraMessage'))
+        .catch(error => console.error('Stop Error:', error));
+    }
 
-          function moveMotor(type_mode, motor) {
-            const degrees = document.getElementById(`${motor}Degrees`).value;
-            const duration = document.getElementById(`${motor}Duration`).value;
-            const syncWithInterval = document.getElementById('syncWithInterval360').checked;
+    function sendShutterData(type_mode) {
+      const shutterData = {
+        type: type_mode,
+        /*fadePercent: document.getElementById('fadePercentSlider').value, 
+        fadeFrames: document.getElementById('fadeFramesSlider').value,
+        syncWithInterval: document.getElementById('syncWithIntervalCheckbox').checked,
+        fadeInActive: document.getElementById('fadeInCheckbox').checked,
+        fadeOutActive: document.getElementById('fadeOutCheckbox').checked*/
+        0: document.getElementById('fadePercentSlider').value,
+        1: document.getElementById('fadeFramesSlider').value,
+        2: document.getElementById('syncWithIntervalCheckbox').checked,
+        3: document.getElementById('fadeInCheckbox').checked,
+        4: document.getElementById('fadeOutCheckbox').checked
+      };
+      fetch('/updateShutter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(shutterData),
+      })
+        .then(response => response.text())
+        .then(() => showMessage('shutterMessage'))
+        .catch(error => console.error('Shutter Error:', error));
+    }
 
-            const motorData = {
-              type: type_mode,
-              motor: motor,
-              degrees: degrees,
-              duration: duration,
-              syncWithInterval: syncWithInterval
-            };
-            fetch('/moveMotor360', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(motorData),
-            })
-              .then(response => response.text())
-              .then(() => showMessage(`${motor}Message`))
-              .catch(error => console.error('Motor Error:', error));
-          }
+    function sendOpticsData(type_mode) {
+      const opticsData = {
+        type: type_mode,
+        zoomValue: document.getElementById('zoomSlider').value,
+        focusValue: document.getElementById('focusSlider').value,
+        diaphragmValue: document.getElementById('diaphragmSelect').value,
+        syncWithInterval: document.getElementById('syncWithIntervalOptics').checked
+      };
+      fetch('/updateOptics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(opticsData),
+      })
+        .then(response => response.text())
+        .then(() => showMessage('opticsMessage'))
+        .catch(error => console.error('Optics Error:', error));
+    }
+
+    function moveMotor(type_mode, motor) {
+      const degrees = document.getElementById(`${motor}Degrees`).value;
+      const duration = document.getElementById(`${motor}Duration`).value;
+      const syncWithInterval = document.getElementById('syncWithInterval360').checked;
+
+      const motorData = {
+        type: type_mode,
+        motor: motor,
+        degrees: degrees,
+        duration: duration,
+        syncWithInterval: syncWithInterval
+      };
+      fetch('/moveMotor360', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(motorData),
+      })
+        .then(response => response.text())
+        .then(() => showMessage(`${motor}Message`))
+        .catch(error => console.error('Motor Error:', error));
+    }
+
+    function accion() {
+
+      const accionData = {
+        type: 'accion',
+      };
+      fetch('/accion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(accionData),
+      })
+        .then(response => response.text())
+        .then(() => showMessage('accionMessage'))
+        .catch(error => console.error('Accion Error:', error));
+    }
+
+    function corten() {
+
+      const accionData = {
+        type: 'corten',
+      };
+      fetch('/corten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(accionData),
+      })
+        .then(response => response.text())
+        .then(() => showMessage('accionMessage'))
+        .catch(error => console.error('Corten Error:', error));
+    }
+
+    // Actualizar la interfaz al cambiar los sliders
+    document.getElementById('speedSlider').addEventListener('input', updateDisplay);
+    document.getElementById('fadePercentSlider').addEventListener('input', updateDisplay);
+    document.getElementById('fadeFramesSlider').addEventListener('input', updateDisplay);
+    document.getElementById('zoomSlider').addEventListener('input', updateDisplay);
+    document.getElementById('focusSlider').addEventListener('input', updateDisplay);
+
+    // pide motorSpeed al M7
+    function updateMotorSpeed() {
+      fetch('/motorSpeed')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('fps').value = data.motorSpeedRead;
+        })
+        .catch(error => console.error('Error al obtener motorSpeed:', error));
+    }
+
+    function updatefadePosition() {
+      fetch('/fadePercent')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('fade').value = data.FadePercentRead;
+        })
+        .catch(error => console.error('Error al obtener fadePercent:', error));
+    }
+
+    function updatex0Position() {
+      fetch('/x0Read')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('x0Read').value = data.x0Read;
+        })
+        .catch(error => console.error('Error al obtener x0:', error));
+    }
+
+    function updatex1Position() {
+      fetch('/x1Read')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('x1Read').value = data.x1Read;
+        })
+        .catch(error => console.error('Error al obtener x1:', error));
+    }
+
+    function updatey0Position() {
+      fetch('/y0Read')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('y0Read').value = data.y0Read;
+        })
+        .catch(error => console.error('Error al obtener y0:', error));
+    }
+
+    function updateSensors() {
+      fetch('/sensors')
+        .then(response => response.text())
+        .then(data => {
           
-          function accion() {
+          if (data.startsWith("/sensors:[")) {
+            
+            const sensorValues = data
+              .slice(data.indexOf("[") + 1, data.indexOf("]")) 
+              .split(",") 
+              .map(value => parseFloat(value)); 
 
-            const accionData = {
-              type: 'accion',
-            };
-            fetch('/accion', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(accionData),
-            })
-              .then(response => response.text())
-              .then(() => showMessage('accionMessage'))
-              .catch(error => console.error('Accion Error:', error));
+            
+            if (sensorValues.length >= 1) {
+              document.getElementById('fps').value = sensorValues[0];
+            }
+            if (sensorValues.length >= 2) {
+              document.getElementById('fade').value = sensorValues[1];
+            }
+            if (sensorValues.length >= 3) {
+              document.getElementById('x0Read').value = sensorValues[2];
+            }
+            if (sensorValues.length >= 4) {
+              document.getElementById('x1Read').value = sensorValues[3];
+            }
+            if (sensorValues.length >= 5) {
+              document.getElementById('y0Read').value = sensorValues[4];
+            }
+          } else {
+            console.error('Formato inesperado:', data);
           }
+        })
+        .catch(error => console.error('Error al obtener sensores:', error));
+    }
 
-          function corten() {
+    // Actualiza cada segundo
+    //setInterval(updateMotorSpeed, 100);
+    //setInterval(updatefadePosition, 100);
+    //setInterval(updatex0Position, 100);
+    //setInterval(updatex1Position, 100);
+    //setInterval(updatey0Position, 100);
+  </script>
 
-            const accionData = {
-              type: 'corten',
-            };
-            fetch('/corten', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(accionData),
-            })
-              .then(response => response.text())
-              .then(() => showMessage('accionMessage'))
-              .catch(error => console.error('Corten Error:', error));
-          }
+</body>
 
-          // Actualizar la interfaz al cambiar los sliders
-          document.getElementById('speedSlider').addEventListener('input', updateDisplay);
-          document.getElementById('fadePercentSlider').addEventListener('input', updateDisplay);
-          document.getElementById('fadeFramesSlider').addEventListener('input', updateDisplay);
-          document.getElementById('zoomSlider').addEventListener('input', updateDisplay);
-          document.getElementById('focusSlider').addEventListener('input', updateDisplay);
-
-          // pide motorSpeed al M7
-          function updateMotorSpeed() {
-            fetch('/motorSpeed')
-              .then(response => response.json())
-              .then(data => {
-                document.getElementById('fps').value = data.motorSpeedRead;
-              })
-              .catch(error => console.error('Error al obtener motorSpeed:', error));
-          }
-
-          function updatefadePosition() {
-            fetch('/fadePercent')
-              .then(response => response.json())
-              .then(data => {
-                document.getElementById('fade').value = data.FadePercentRead;
-              })
-              .catch(error => console.error('Error al obtener fadePercent:', error));
-          }
-
-          function updatex0Position() {
-            fetch('/x0Read')
-              .then(response => response.json())
-              .then(data => {
-                document.getElementById('x0Read').value = data.x0Read;
-              })
-              .catch(error => console.error('Error al obtener x0:', error));
-          }
-
-          function updatex1Position() {
-            fetch('/x1Read')
-              .then(response => response.json())
-              .then(data => {
-                document.getElementById('x1Read').value = data.x1Read;
-              })
-              .catch(error => console.error('Error al obtener x1:', error));
-          }
-
-          function updatey0Position() {
-            fetch('/y0Read')
-              .then(response => response.json())
-              .then(data => {
-                document.getElementById('y0Read').value = data.y0Read;
-              })
-              .catch(error => console.error('Error al obtener y0:', error));
-          }
-
-          // Actualiza cada segundo
-          setInterval(updateMotorSpeed, 100);
-          //setInterval(updatefadePosition, 100);
-          //setInterval(updatex0Position, 100);
-          //setInterval(updatex1Position, 100);
-          //setInterval(updatey0Position, 100);
-        </script>
-
-      </body>
-
-      </html>
-      )rawliteral";
+</html>
+)rawliteral";
