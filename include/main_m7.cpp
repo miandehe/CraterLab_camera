@@ -371,6 +371,13 @@ void loop() {
             client.println("Content-type:text/plain");
             client.println();
             client.println("Datos enviados correctamente");
+          } else if (request.indexOf("GET /sensors") >= 0) { // actualiza fps en interface
+            // Respuesta para la ruta /motorSpeed
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-Type: application/json");
+            client.println();
+            String response = "{\"sensors\":[" + String(motorSpeedRead) + "," + String(FadePercentRead) + "," + String(x0DegreesRead) + "," + String(x1DegreesRead) + "," + String(y0DegreesRead) + "]}";
+            client.print(response); 
           } else if (request.indexOf("GET /motorSpeed") >= 0) { // actualiza fps en interface
             // Respuesta para la ruta /motorSpeed
             client.println("HTTP/1.1 200 OK");
