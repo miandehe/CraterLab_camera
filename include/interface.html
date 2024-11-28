@@ -500,6 +500,9 @@ const char *htmlTemplate = R"rawliteral(
         .catch(error => console.error('Error al obtener sensores:', error));
     }
 
+    // Llama a updateSensors cada 100ms
+    setInterval(updateSensors, 100);
+
     // Actualiza cada segundo
     //setInterval(updateMotorSpeed, 100);
     //setInterval(updatefadePosition, 100);
