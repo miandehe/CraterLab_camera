@@ -18,14 +18,19 @@ const char *ssid = "Analogue_Hyperlapse_Camera";
 const char *password = "CraterLab";
 
 IPAddress ip(192, 168, 8, 4);
+IPAddress remote_ip(192, 168, 8, 3);
 IPAddress gateway(192, 168, 8, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress dns(192, 168, 8, 1); //primaryDNS
 
 // Crear el servidor en el puerto 80
 WiFiServer server(80);
-
-#define command Serial2
+// Crear conexion UDP para enviar datos
+WiFiUDP Udp;
+unsigned int remotePort = 2390;      // local port to send
+unsigned int localPort = 2392;      // local port to read
+char packetBuffer[255]; //buffer to hold incoming packet
+char  ReplyBuffer[] = "acknowledged";       // a string to send back
 
 // Motor
 int motorSpeedValue = 25;
@@ -124,55 +129,10 @@ void RPCRead()
        }
   }
 
-char c_serial;
-String inputString_serial;
-
-void SerialRead()
-  {
-     ////////////////////////////////////////////////////////////
-     /////// RUTINA TRATAMIENTO DE STRINGS DEL UART   ///////////
-     ////////////////////////////////////////////////////////////
-     if (command.available())
-       {
-         c_serial = command.read();
-         if ((c_serial == '\r') || (c_serial == '\n'))
-         {
-          if (inputString_serial.startsWith("/sensors:")) //Speed Motor
-           {
-              int* value = decode_values(inputString_serial, 3);
-              #if DEBUG_M4
-                RPC.print("Recibido Speed M4: ");
-                RPC.println(inputString_serial);
-                for(int i=0; i<5; i++) RPC.println(value[i]);
-              #endif
-              x0DegreesRead = value[0];
-              x1DegreesRead = value[1];
-              y0DegreesRead = value[2];
-            }
-           inputString_serial = String();
-         }
-         else
-           inputString_serial += c_serial;
-       }
-  }
-
-unsigned long time_refresh_sensors = millis();
-
-void refresh_sensors()
-  {
-    if((millis()-time_refresh_sensors)>=500)
-      {
-        time_refresh_sensors = millis();
-        RPC.println("/sensors:1");
-        command.println("/sensors:1");
-      }
-  }
 void setup()
 {
   Serial.begin(1000000);
-  command.begin(9600);
   RPC.begin(); //boots M4
-
   #if AP_MODE
     int status = WL_IDLE_STATUS;
     // Create open network. Change this line if you want to create an WEP network:
@@ -198,8 +158,10 @@ void setup()
   Serial.println("Conectado a WiFi!");
   Serial.print("Dirección IP: ");
   Serial.println(WiFi.localIP());
-
+  // Enable Server
   server.begin();
+  // Enable UDP
+  Udp.begin(localPort);
 }
 
 bool flag_send[10] = {false ,false ,false ,false ,false ,false ,false ,false ,false ,false};
@@ -281,45 +243,21 @@ void handlePostRequest(String body) {
       syncWithIntervalOptics = doc["syncWithInterval"];
       RPC.println("/optics:" + String(zoomValue) + "," + String(focusValue) + "," + String(diaphragmValue) + "," + String(syncWithIntervalOptics) + "," + String(save));
     }
-  else if((type=="test_360")||(type=="save_360"))
-    {
-      Serial.println(type);
-      if (type=="save_360") save = true;
-      else save = false;
-      String axis = doc["motor"];
-      if (axis=="x0")
-        {
-          x0Degrees = doc["degrees"];
-          x0Duration = doc["duration"];
-          syncWithInterval360 = doc["syncWithInterval"];
-          command.println("/axisA:" + String(x0Degrees) + "," + String(x0Duration) + "," + String(syncWithInterval360) + "," + String(save));
-        }
-      else if (axis=="x1")  
-        {
-          x1Degrees = doc["degrees"];
-          x1Duration = doc["duration"];
-          syncWithInterval360 = doc["syncWithInterval"];
-          command.println("/axisX:" + String(x1Degrees) + "," + String(x1Duration) + "," + String(syncWithInterval360) + "," + String(save));
-        }
-      else if (axis=="y0")
-        {
-          y0Degrees = doc["degrees"];
-          y0Duration = doc["duration"];
-          syncWithInterval360 = doc["syncWithInterval"];
-          command.println("/axisY:" + String(y0Degrees) + "," + String(y0Duration) + "," + String(syncWithInterval360) + "," + String(save));
-        }
-    }
   else if (type=="accion")
     {
       Serial.println(type);
       RPC.println("/action:" + String(1));
-      command.println("/action:" + String(1));
+      Udp.beginPacket(remote_ip, remotePort);
+      Udp.println("/action:" + String(1));
+      Udp.endPacket();
     }
   else if (type=="corten")
     {
       Serial.println(type);
       RPC.println("/action:" + String(0));
-      command.println("/action:" + String(0));
+      Udp.beginPacket(remote_ip, remotePort);
+      Udp.println("/action:" + String(0));
+      Udp.endPacket();
     }
   else if (type=="stop") RPC.println("/s_motor:4," + String(motorDirection) + "," + String(0) + ", 0");
   else Serial.println("No reconocido");
@@ -394,10 +332,8 @@ void loop() {
       Serial.println("Cliente desconectado");
     #endif
   }
-
+  //Enviar datos a M4
   RPCRead();
-  SerialRead();
-  refresh_sensors();
 
   // Leer datos del RPC
   /*String buffer = "";
