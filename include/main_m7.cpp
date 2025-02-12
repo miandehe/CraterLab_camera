@@ -129,6 +129,17 @@ void RPCRead()
        }
   }
 
+unsigned long time_refresh_sensors = millis();
+
+void refresh_sensors()
+  {
+    if((millis()-time_refresh_sensors)>=500)
+      {
+        time_refresh_sensors = millis();
+        RPC.println("/sensors:1");
+      }
+  }
+
 void setup()
 {
   Serial.begin(1000000);
@@ -313,8 +324,7 @@ void loop() {
             client.println("HTTP/1.1 200 OK");
             client.println("Content-Type: application/json");
             client.println();
-            String response = "{\"sensors\":[" + String(motorSpeedRead) + "," + String(FadePercentRead) + "," 
-                                  + String(x0DegreesRead) + "," + String(x1DegreesRead) + "," + String(y0DegreesRead) + "]}";
+            String response = "{\"sensors\":[" + String(motorSpeedRead) + "," + String(FadePercentRead) + "]}";
             client.print(response); 
           } else {
             // Respuesta para servir la interfaz HTML
@@ -334,14 +344,5 @@ void loop() {
   }
   //Enviar datos a M4
   RPCRead();
-
-  // Leer datos del RPC
-  /*String buffer = "";
-  while (RPC.available()) {
-    buffer += (char)RPC.read();
-  }
-
-  if (buffer.length() > 0) {
-    Serial.print(buffer);
-  }*/
+  refresh_sensors();
 }

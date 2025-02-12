@@ -422,55 +422,18 @@ const char *htmlTemplate = R"rawliteral(
         .catch(error => console.error('Error al obtener fadePercent:', error));
     }
 
-    function updatex0Position() {
-      fetch('/x0Read')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('x0Read').value = data.x0Read;
-        })
-        .catch(error => console.error('Error al obtener x0:', error));
-    }
-
-    function updatex1Position() {
-      fetch('/x1Read')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('x1Read').value = data.x1Read;
-        })
-        .catch(error => console.error('Error al obtener x1:', error));
-    }
-
-    function updatey0Position() {
-      fetch('/y0Read')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('y0Read').value = data.y0Read;
-        })
-        .catch(error => console.error('Error al obtener y0:', error));
-    }
-
     function updateSensors() {
       fetch('/sensors')
         .then(response => response.json()) // Parsear la respuesta como JSON
         .then(data => {
           if (data.sensors && Array.isArray(data.sensors)) {
             const sensorValues = data.sensors;
-
             // Asignar los valores a los elementos de la interfaz
             if (sensorValues.length >= 1) {
               document.getElementById('fps').value = sensorValues[0];
             }
             if (sensorValues.length >= 2) {
               document.getElementById('fade').value = sensorValues[1];
-            }
-            if (sensorValues.length >= 3) {
-              document.getElementById('x0Read').value = sensorValues[2];
-            }
-            if (sensorValues.length >= 4) {
-              document.getElementById('x1Read').value = sensorValues[3];
-            }
-            if (sensorValues.length >= 5) {
-              document.getElementById('y0Read').value = sensorValues[4];
             }
           } else {
             console.error('Estructura inesperada:', data);
