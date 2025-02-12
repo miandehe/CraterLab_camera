@@ -110,6 +110,16 @@ const char *htmlTemplate = R"rawliteral(
       max-width: 600px;
       margin: 0 auto;
     }
+
+    iframe {
+      display: block;
+      width: 100%;
+      min-height: 100px;
+      /* Evita que sea muy pequeño al inicio */
+      overflow: hidden !important;
+      /* Asegura que no haya barras de desplazamiento */
+      border: none;
+    }
   </style>
 </head>
 
@@ -204,7 +214,8 @@ const char *htmlTemplate = R"rawliteral(
     <div class="section">
       <!-- Sección Dispositivo 360 -->
       <h3>Dispositivo 360</h3>
-	  <iframe src="http://192.168.8.3" width="100%" height="400px" style="border: none;"></iframe>
+      <iframe id="iframe360" src="http://192.168.8.3" width="100%" height="400px" style="border: none;"></iframe> 
+      <!-- <iframe id="iframe360" src="iframe.html" width="100%" height="400px" style="border: none;"></iframe> -->
     </div>
 
     <div class="section">
@@ -218,6 +229,20 @@ const char *htmlTemplate = R"rawliteral(
   </div>
   <!-- Script para manejar las interacciones y enviar el JSON -->
   <script>
+
+    window.addEventListener("message", function (event) {
+      console.log("Mensaje recibido:", event.data); // Depuración
+
+      // Seleccionar el iframe específico por su ID
+      const targetIframe = document.getElementById("iframe360");
+
+      // Verificar que el mensaje contiene un número válido (altura)
+      if (targetIframe && typeof event.data === "number" && event.data > 0) {
+        targetIframe.style.height = event.data + "px";
+        console.log("Altura ajustada del iframe a:", event.data + "px"); // Depuración
+      }
+    });
+
     function updateDisplay() {
       document.getElementById('speedValueDisplay').innerText = document.getElementById('speedSlider').value;
       document.getElementById('fadePercentDisplay').innerText = document.getElementById('fadePercentSlider').value;
